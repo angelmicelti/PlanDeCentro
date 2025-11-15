@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan de Centro - IES Virgen de Villadiego</title>
+    <style>
+        :root {
+            --primary-color: #1a4b8c;
+            --secondary-color: #2c6cb0;
+            --accent-color: #e63946;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --success-color: #28a745;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            background-color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            color: var(--dark-color);
+        }
+        
+        .tab-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .tab-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .buttons-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .apartado-btn {
+            position: relative;
+            padding: 1.2rem 0.8rem;
+            background-color: white;
+            border: 2px solid var(--secondary-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            color: var(--primary-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100px;
+            width: 200px;
+            text-decoration: none;
+        }
+        
+        .apartado-btn:hover {
+            background-color: var(--secondary-color);
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .apartado-btn .apartado-code {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        
+        .apartado-btn .apartado-name {
+            font-size: 0.9rem;
+            text-align: center;
+            opacity: 0;
+            max-height: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .apartado-btn:hover .apartado-name {
+            opacity: 1;
+            max-height: 100px;
+        }
+        
+        .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            max-width: 300px;
+            text-align: center;
+        }
+        
+        .apartado-btn:hover .tooltip {
+            opacity: 1;
+        }
+        
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 3rem;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tab-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .buttons-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Plan de Centro - IES Virgen de Villadiego</h1>
+            <p>Peñaflor, Sevilla - Curso 2025-2026</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="nav-tabs">
+            <button class="tab-btn active" data-target="proyecto-educativo">Proyecto Educativo</button>
+            <button class="tab-btn" data-target="reglamento-organizacion">Reglamento de Organización</button>
+            <button class="tab-btn" data-target="proyecto-gestion">Proyecto de Gestión</button>
+            <button class="tab-btn" data-target="plan-actuacion-digital">Plan de Actuación Digital</button>
+            <button class="tab-btn" data-target="plan-mejora">Plan de Mejora</button>
+        </div>
+        
+        <!-- PROYECTO EDUCATIVO -->
+        <div id="proyecto-educativo" class="section active">
+            <h2 class="section-title">Proyecto Educativo</h2>
+            <div class="buttons-grid">
+                <!-- Los botones se generarán con JavaScript -->
+            </div>
+        </div>
+        
+        <!-- REGLAMENTO DE ORGANIZACIÓN Y FUNCIONAMIENTO -->
+        <div id="reglamento-organizacion" class="section">
+            <h2 class="section-title">Reglamento de Organización y Funcionamiento</h2>
+            <div class="buttons-grid">
+                <!-- Los botones se generarán con JavaScript -->
+            </div>
+        </div>
+        
+        <!-- PROYECTO DE GESTIÓN -->
+        <div id="proyecto-gestion" class="section">
+            <h2 class="section-title">Proyecto de Gestión</h2>
+            <div class="buttons-grid">
+                <!-- Los botones se generarán con JavaScript -->
+            </div>
+        </div>
+        
+        <!-- PLAN DE ACTUACIÓN DIGITAL -->
+        <div id="plan-actuacion-digital" class="section">
+            <h2 class="section-title">Plan de Actuación Digital</h2>
+            <div class="buttons-grid">
+                <!-- Los botones se generarán con JavaScript -->
+            </div>
+        </div>
+        
+        <!-- PLAN DE MEJORA -->
+        <div id="plan-mejora" class="section">
+            <h2 class="section-title">Plan de Mejora</h2>
+            <div class="buttons-grid">
+                <!-- Los botones se generarán con JavaScript -->
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>IES Virgen de Villadiego - Peñaflor, Sevilla</p>
+        <p>Curso 2025-2026</p>
+    </footer>
+
+    <script>
+        // Datos de los apartados del Plan de Centro con enlaces corregidos del documento Word
+        const apartados = {
+            "proyecto-educativo": [
+                { 
+                    codigo: "APARTADO 0", 
+                    nombre: "ESTUDIO DEL CONTEXTO",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vS5YfULKbvI1zDtcTQBRGcwhqUwLls1n5lFph-egeudVr5n6Q80Y4rSsAjeDLvVpQwMTdmIDVcjsrlK/pub"
+                },
+                { 
+                    codigo: "APARTADO A", 
+                    nombre: "LÍNEAS GENERALES DE ACTUACIÓN PEDAGÓGICA",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTbY79inB7jT93DQIvNTMFFjvVopt9FVk_7t2u3MrFcU9G2HQ67tKRruaZxgjAiu0LdXpfxSswbT8HZ/pub"
+                },
+                { 
+                    codigo: "APARTADO B", 
+                    nombre: "MEDIDAS PARA LA MEJORA DEL RENDIMIENTO ESCOLAR",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vQ05CoWMnfqyFXZ8-8KjAFbjlkoFKnebhqqRW44WtJDoMEksRAfPzOm5JWDWxR3sjStEcANqmvsi-8N/pub"
+                },
+                { 
+                    codigo: "APARTADO C", 
+                    nombre: "PROGRAMACIONES DIDÁCTICAS",
+                    enlace: "#"
+                },
+                { 
+                    codigo: "APARTADO D", 
+                    nombre: "CRITERIOS PEDAGÓGICOS PARA DETERMINAR LOS ÓRGANOS DE COORDINACIÓN DOCENTE Y EL HORARIO DE LOS RESPONSABLES",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTwBr0Qbys4aWOEYrCHwMLIJc9x0uNv_Q0bHLCGH4FGdqsK-mnEigHWfaCeN35-7v7-xbDR8nRNFEXu/pub"
+                },
+                { 
+                    codigo: "APARTADO E", 
+                    nombre: "PROCEDIMIENTOS, CRITERIOS DE EVALUACIÓN Y DE PROMOCIÓN",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vRmh1SQVVm4dAphLfCladNtdT-6do8i3S0oS6DyEJDv85bpkVttUJ8art1FnzxNCm6x3hQVErlWhpvy/pub"
+                },
+                { 
+                    codigo: "APARTADO F", 
+                    nombre: "ATENCIÓN A LA DIVERSIDAD",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vQx2fT9axf_Y9_xgfHPTMUQ34orETi8CHovd7SnuMOEsbDbMb1HVgExy0XqEjstiMnQBfDY1PETwdQw/pub"
+                },
+                { 
+                    codigo: "APARTADO G", 
+                    nombre: "ACTIVIDADES DE RECUPERACIÓN",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vRF2GuifNdVmLyeI0Qs2I_qnK_p0Qi4z1DFjW3YR5fpoZshh3k9tgTtpyIslbcwYCp1dBmLTGVuDeVH/pub"
+                },
+                { 
+                    codigo: "APARTADO H", 
+                    nombre: "PLAN DE ORIENTACIÓN Y ACCIÓN TUTORIAL",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTa_lzihLpKsfdYZegeFy5Iok_x3-MI0prSpibmHacM0IX4UZguSMzMvXMiocd8CVu1ICAMf5QKR0wI/pub"
+                },
+                { 
+                    codigo: "APARTADO I", 
+                    nombre: "PROCEDIMIENTOS PARA SUSCRIBIR COMPROMISOS CON LAS FAMILIAS",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vRJ8uOGHObGlFwFNa_kA8csWcLOZ0TPae6Gz3Q_s7wSOYafJx2CkA8GNv8dl4GK6gf0Wje9J6duNX4s/pub"
+                },
+                { 
+                    codigo: "APARTADO J", 
+                    nombre: "PLAN DE CONVIVENCIA",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vQGHMOIVxgvYFVdrRggw4ZSEPfZIY3yCChpzmPpDY2k4Y_3DjSYfe7GAT3Xe7o7ee1DeAZihICoI8J2/pub"
+                },
+                { 
+                    codigo: "APARTADO K", 
+                    nombre: "PLAN DE FORMACIÓN DEL PROFESORADO",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vS6J8eOzFygftoSdLEfDZqBb3-yLsbF5qlVkoK1W1rb2mEB-_XYzZ03S1eBDiM4g_qwe3eeRbslKsfr/pub"
+                },
+                { 
+                    codigo: "APARTADO L", 
+                    nombre: "CRITERIOS PARA LA ORGANIZACIÓN DEL TIEMPO ESCOLAR",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vSUCSVqgjdc5jMVxSGavFrGurxIrslaQKZIQu3GYUyxUEUlvHWGpRPUobqLic69CzJY6Lmmx0WuEySJ/pub"
+                },
+                { 
+                    codigo: "APARTADO M", 
+                    nombre: "CRITERIOS METODOLÓGICOS GENERALES",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vQ2qahlCztTvLwed8qbam5cJC_EyyHE6lsee_wL7RRmVaQH1xEUNSz9A9eB-N-c_r1lhXVOBDflgzA0/pub"
+                },
+                { 
+                    codigo: "APARTADO N", 
+                    nombre: "PROCEDIMIENTO DE EVALUACIÓN INTERNA",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTRXI9ukeHOKMhGWostbt_4CD2dTF08sjEaX9jNFsba0cVIX4wGInxeM4qei2wf9izCJGtKrchOIEVe/pub"
+                },
+                { 
+                    codigo: "APARTADO Ñ", 
+                    nombre: "CRITERIOS PARA EL AGRUPAMIENTO DEL ALUMNADO Y LA ASIGNACIÓN DE TUTORÍAS",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vT6-O6ufrYqeAFcvcyUjHnuBmGn-kH5NyJb5X6-392WG77uy7u6ZJHReDj5UbQ9mLO2Is4HnM_VDPPu/pub"
+                },
+                { 
+                    codigo: "APARTADO O", 
+                    nombre: "CRITERIOS PARA LA OFERTA DE OPTATIVAS",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTf-Twquca1mGmuvYsfI-mxYxpI5iy41tMJ4hKvDGlvJr2MeIeDKAlV_xUNb3IhNKZHKB6dXDxatsNJ/pub"
+                },
+                { 
+                    codigo: "APARTADO Q", 
+                    nombre: "CRITERIOS PARA LA ELABORACIÓN DE PROGRAMACIONES DIDÁCTICAS",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vR3DPbnVgYXbw5mNCOscq9uXoUS_43kFdUbUUdQxlappSUicQndguVwNrX7WR8shB3drfGSHt5lUgji/pub"
+                },
+                { 
+                    codigo: "APARTADO R", 
+                    nombre: "PLANES ESTRATÉGICOS DEL IES",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTXsUxTMn8ndQs7gA0gy99pc5aLvkH3GKcR1dYmg1xxWiDdfQmdvd4ojCascqGKt9mhtmLD8md3ZCyY/pub"
+                },
+                { 
+                    codigo: "APARTADO S", 
+                    nombre: "PLANES Y PROGRAMAS DEL IES",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vSjG5BVWM7mDn0lYwEcrOhQxRkNM2QHRAtRu48ik99OfS6lIOwq6_bYKYkDbEuGRTbtb-bR_-iSmd2m/pub"
+                },
+                { 
+                    codigo: "APARTADO T", 
+                    nombre: "TRATAMIENTO DE LA LECTURA",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vQWh5cK5NK8MVjPitjdjtDecVzzvamQmOiHGUXvTAPE7NIyx9a9rrutghCCiwW1waQJ5crWjIsKPq-N/pub"
+                },
+                { 
+                    codigo: "APARTADO U", 
+                    nombre: "TRATAMIENTO DEL RAZONAMIENTO MATEMÁTICO",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTVqXE3UbuEfWouWgwaYc5cNZVcZvrvLOdPRKaFTnzeDVtiRrkZyRnqBW7R3qwxslVc0vc56NgD0vtR/pub"
+                }
+            ],
+            "reglamento-organizacion": [
+                { 
+                    codigo: "APARTADO 0", 
+                    nombre: "ÓRGANOS COLEGIADOS DE GOBIERNO",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vQaQGI-6D4QR9v0NyitcxOJHUEM42slOG4V-OFEncvkVxEE-P6XvI78gDB53gBahMv4uoZPkzDkKWWk/pub"
+                },
+                { 
+                    codigo: "APARTADO 1", 
+                    nombre: "EL EQUIPO DIRECTIVO",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vQDsiznmZI47OPrJgLSIq1w5NMqHx7wNld7OYCgFo1sBQ5Qy-d6_-FUZ-JYMfLOG7GLJrDgxHMBFlaB/pub"
+                },
+                { 
+                    codigo: "APARTADO A", 
+                    nombre: "CAUCES DE PARTICIPACIÓN DE LA COMUNIDAD EDUCATIVA",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vQoFJqKUSGIP1pr9JKCVCAxfUrV0o-EnkZ9ZmNIKllPoT7XXTNB6ieZk6EFjPwVAp2hAA-5bxG8dbpu/pub"
+                },
+                { 
+                    codigo: "APARTADO B", 
+                    nombre: "CRITERIOS Y PROCEDIMIENTOS QUE GARANTICEN EL RIGOR Y LA TRANSPARENCIA EN LA TOMA DE DECISIONES",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTYAuHZfDszFOZyrZpN-nFBA8a-wXZzoiftM2BDKBkZ1VCMbd9Nl1OdL0XchBcDudB0GGGcYgeKsmvS/pub"
+                },
+                { 
+                    codigo: "APARTADO C", 
+                    nombre: "ORGANIZACIÓN DE ESPACIOS, INSTALACIONES Y RECURSOS MATERIALES",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vSPAq2aqnGFqq5bk22Pgs0Cu9MUlfbRQP8S4t65VfLnFXaTyIHM7mZVtcDHNUUGkEUFn3xtIaeCT0k5/pub"
+                },
+                { 
+                    codigo: "APARTADO D", 
+                    nombre: "ORGANIZACIÓN DEL CENTRO",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTms8e_GmWlhD26g-T7stm4bfE53XmSy6iZ8Cavu9OEKW_UrvFo9T8fWWY0HfWvYmj-FbZ8EJIBPz1V/pub"
+                },
+                { 
+                    codigo: "APARTADO E", 
+                    nombre: "PROGRAMA DE GRATUIDAD DE LIBROS DE TEXTO",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTh1DK3kc0Kh2fbTKNZYUDYwLUSK8GHzhRvOgPOSeoDAQ-NwLIf7Y14chO7FS2_o9vHSCGfS-FZxH2w/pub"
+                },
+                { 
+                    codigo: "APARTADO G", 
+                    nombre: "PROCEDIMIENTO PARA LA DESIGNACIÓN DE LOS MIEMBROS DEL EQUIPO DE EVALUACIÓN",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vRDJ-g0Hby8ezDyTVCOWfsBKhJAYPtt_dIedhigtydPIfv__IjrcA2o6td3NgimIma8aWom4m2P1gaR/pub"
+                },
+                { 
+                    codigo: "APARTADO H", 
+                    nombre: "PLAN DE AUTOPROTECCIÓN",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vQMfwpJXQCDjEzS_j4_DSMKEckOdmMvEiauKHein138SxdxEC8Zq-zeXVPMTBQmUz3Nso7H0Nhak2mL/pub"
+                },
+                { 
+                    codigo: "APARTADO I", 
+                    nombre: "NORMAS DE USO DE DISPOSITIVOS ELECTRÓNICOS",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vSRR9K4UKAR_SOPJ9QhqbVx7_ecNvoffn2vUYuJvIDY1cGijCnuK-u_hV2RhajBL1Hsfs7KMZiEu4Ip/pub"
+                },
+                { 
+                    codigo: "APARTADO K", 
+                    nombre: "ACTIVIDADES COMPLEMENTARIAS Y EXTRAESCOLARES",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vSuanIphM03Lb5BpRsYHyU_8pYtpSxsMCrCE-jqswYNdnASyzewRt0iIgHTUqq0e0DRFCdLlcmR6zfo/pub"
+                }
+            ],
+            "proyecto-gestion": [
+                { 
+                    codigo: "PROYECTO DE GESTIÓN", 
+                    nombre: "PROYECTO DE GESTIÓN",
+                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTQ88RbdVuktV3J6BN2DbPeoUrTLkcWFsmZhnt3fZPwu6yb1pYjUzmQEIQXDiWqBXnDiGLQCTh-TsZM/pub"
+                }
+            ],
+            "plan-actuacion-digital": [
+                { 
+                    codigo: "PLAN DE ACTUACIÓN DIGITAL", 
+                    nombre: "PLAN DE ACTUACIÓN DIGITAL",
+                    enlace: "https://drive.google.com/file/d/1Vdy4akjALInSe4wYPUq7m2W_5h4WCmWt/view?usp=sharing"
+                }
+            ],
+            "plan-mejora": [
+                { 
+                    codigo: "PLAN DE MEJORA", 
+                    nombre: "PLAN DE MEJORA",
+                    enlace: "https://drive.google.com/file/d/14hE14icagkunnRo7fugOAepEymjb6t3_/view?usp=sharing"
+                }
+            ]
+        };
+
+        // Función para generar los botones de apartados
+        function generarBotonesApartados() {
+            for (const seccion in apartados) {
+                const contenedor = document.querySelector(`#${seccion} .buttons-grid`);
+                contenedor.innerHTML = '';
+                
+                apartados[seccion].forEach(apartado => {
+                    const boton = document.createElement('a');
+                    boton.className = 'apartado-btn';
+                    boton.href = apartado.enlace;
+                    boton.target = '_blank';
+                    boton.innerHTML = `
+                        <span class="apartado-code">${apartado.codigo}</span>
+                        <span class="apartado-name">${apartado.nombre}</span>
+                        <div class="tooltip">${apartado.nombre}</div>
+                    `;
+                    contenedor.appendChild(boton);
+                });
+            }
+        }
+
+        // Función para cambiar entre secciones
+        function cambiarSeccion(seccionId) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.section').forEach(seccion => {
+                seccion.classList.remove('active');
+            });
+            
+            // Mostrar la sección seleccionada
+            document.getElementById(seccionId).classList.add('active');
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.tab-btn').forEach(boton => {
+                boton.classList.remove('active');
+            });
+            
+            document.querySelector(`[data-target="${seccionId}"]`).classList.add('active');
+        }
+
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generar botones de apartados
+            generarBotonesApartados();
+            
+            // Configurar eventos para los botones de navegación
+            document.querySelectorAll('.tab-btn').forEach(boton => {
+                boton.addEventListener('click', function() {
+                    const seccionId = this.getAttribute('data-target');
+                    cambiarSeccion(seccionId);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
