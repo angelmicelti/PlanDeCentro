@@ -3,6 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Favicon -->
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
+
+	<!-- Manifest para PWA -->
+	<link rel="manifest" href="manifest.json">
+
+	<!-- iOS support -->
+	<link rel="apple-touch-icon" href="icons/icon-192x192.png">
+	<meta name="apple-mobile-web-app-status-bar" content="#1a4b8c">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+
+	<!-- Theme color -->
+	<meta name="theme-color" content="#1a4b8c">
+
+	<!-- Viewport para iOS -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+	
     <title>Plan de Centro - IES Virgen de Villadiego</title>
     <style>
         :root {
@@ -530,5 +547,43 @@
             });
         });
     </script>
+		<script>
+	  // Registrar Service Worker
+	  if ('serviceWorker' in navigator) {
+		window.addEventListener('load', () => {
+		  navigator.serviceWorker.register('/PlanDeCentro/sw.js')
+			.then(registration => {
+			  console.log('Service Worker registrado con éxito:', registration);
+			})
+			.catch(error => {
+			  console.log('Error al registrar el Service Worker:', error);
+			});
+		});
+	  }
+
+	  // Detectar cambios y actualizar
+	  let newWorker;
+	  function showUpdateBar() {
+		// Aquí puedes mostrar una notificación al usuario
+		// informando que hay una nueva versión disponible
+		if (confirm('Hay una nueva versión disponible. ¿Deseas actualizar?')) {
+		  newWorker.postMessage({ action: 'skipWaiting' });
+		}
+	  }
+
+	  // Escuchar el evento de actualización
+	  navigator.serviceWorker.addEventListener('controllerchange', () => {
+		window.location.reload();
+	  });
+
+	  if ('serviceWorker' in navigator) {
+		navigator.serviceWorker.addEventListener('message', event => {
+		  if (event.data && event.data.type === 'NEW_VERSION_FOUND') {
+			newWorker = event.data.worker;
+			showUpdateBar();
+		  }
+		});
+	  }
+	</script>
 </body>
 </html>
