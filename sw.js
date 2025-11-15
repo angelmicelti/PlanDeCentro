@@ -1,33 +1,7 @@
 // Agrega al inicio del archivo sw.js
 const API_URL = 'https://angelmicelti.github.io/PlanDeCentro/';
 
-// Función para verificar actualizaciones
-async function checkForUpdates() {
-  try {
-    const response = await fetch(API_URL);
-    const text = await response.text();
-    
-    // Aquí puedes implementar lógica para detectar cambios
-    // Por ejemplo, comparar versiones o fechas de modificación
-    
-    // Notificar a la app sobre nueva versión
-    self.clients.matchAll().then(clients => {
-      clients.forEach(client => {
-        client.postMessage({
-          type: 'NEW_VERSION_FOUND',
-          worker: self
-        });
-      });
-    });
-  } catch (error) {
-    console.log('Error verificando actualizaciones:', error);
-  }
-}
-
-// Verificar actualizaciones periódicamente
-setInterval(checkForUpdates, 24 * 60 * 60 * 1000); // Cada 24 horas
-
-const CACHE_NAME = 'plan-de-centro-v1.0.0';
+const CACHE_NAME = 'plan-de-centro-v2.0.0';
 const urlsToCache = [
   '/PlanDeCentro/',
   '/PlanDeCentro/index.html',
@@ -71,3 +45,30 @@ self.addEventListener('fetch', event => {
     )
   );
 });
+
+// Función para verificar actualizaciones
+async function checkForUpdates() {
+  try {
+    const response = await fetch(API_URL);
+    const text = await response.text();
+    
+    // Aquí puedes implementar lógica para detectar cambios
+    // Por ejemplo, comparar versiones o fechas de modificación
+    
+    // Notificar a la app sobre nueva versión
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'NEW_VERSION_FOUND',
+          worker: self
+        });
+      });
+    });
+  } catch (error) {
+    console.log('Error verificando actualizaciones:', error);
+  }
+}
+
+// Verificar actualizaciones periódicamente
+setInterval(checkForUpdates, 24 * 60 * 60 * 1000); // Cada 24 horas
+
