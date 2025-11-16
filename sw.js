@@ -1,7 +1,7 @@
 // Agrega al inicio del archivo sw.js
 const API_URL = 'https://angelmicelti.github.io/PlanDeCentro/';
 
-const CACHE_NAME = 'plan-de-centro-v2.0.0';
+const CACHE_NAME = 'plan-de-centro-v2.1.0';
 const urlsToCache = [
   '/PlanDeCentro/',
   '/PlanDeCentro/index.html',
