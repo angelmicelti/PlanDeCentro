@@ -1,11 +1,11 @@
 // Agrega al inicio del archivo sw.js
-const API_URL = 'https://angelmicelti.github.io/PlanDeCentro/';
+const API_URL = 'https://iesvilladiego.github.io/plandecentro/';
 
-const CACHE_NAME = 'plan-de-centro-v2.1.0';
+const CACHE_NAME = 'plan-de-centro-v2.2.0';
 const urlsToCache = [
-  '/PlanDeCentro/',
-  '/PlanDeCentro/index.html',
-  '/PlanDeCentro/manifest.json',
+  '/',
+  '/index.html',
+  '/manifest.json',
   // Agrega aquí otros recursos si los tienes (CSS, JS, imágenes)
 ];
 
