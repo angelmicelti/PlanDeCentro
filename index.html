@@ -3,24 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<!-- Favicon -->
-	<link rel="icon" type="image/x-icon" href="favicon.ico">
+        <!-- Favicon -->
+        <link rel="icon" type="image/x-icon" href="favicon.ico">
 
-	<!-- Manifest para PWA -->
-	<link rel="manifest" href="manifest.json">
+        <!-- Manifest para PWA -->
+        <link rel="manifest" href="manifest.json">
 
-	<!-- iOS support -->
-	<link rel="apple-touch-icon" href="icons/icon-192x192.png">
-	<meta name="apple-mobile-web-app-status-bar" content="#1a4b8c">
-	<meta name="apple-mobile-web-app-capable" content="yes">
+        <!-- iOS support -->
+        <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+        <meta name="apple-mobile-web-app-status-bar" content="#1a4b8c">
+        <meta name="apple-mobile-web-app-capable" content="yes">
 
-	<!-- Theme color -->
-	<meta name="theme-color" content="#1a4b8c">
+        <!-- Theme color -->
+        <meta name="theme-color" content="#1a4b8c">
 
-	<!-- Viewport para iOS -->
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-	
+        <!-- Viewport para iOS -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+        
     <title>Plan de Centro - IES Virgen de Villadiego</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
     <style>
         :root {
             --primary-color: #1a4b8c;
@@ -29,6 +34,7 @@
             --light-color: #f8f9fa;
             --dark-color: #343a40;
             --success-color: #28a745;
+            --warning-color: #ffc107;
         }
         
         * {
@@ -50,6 +56,7 @@
             padding: 1.5rem;
             text-align: center;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
         
         .header-content {
@@ -60,11 +67,124 @@
         header h1 {
             font-size: 1.8rem;
             margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+
+        header h1:hover {
+            opacity: 0.9;
         }
         
         header p {
             font-size: 1rem;
             opacity: 0.9;
+        }
+
+        /* Año editable */
+        .year-display {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .year-text {
+            cursor: default;
+        }
+
+        .year-text.editable {
+            cursor: pointer;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .year-text.editable:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .edit-year-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .edit-year-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .edit-year-btn.visible {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        /* Panel de info de usuario */
+        .user-panel {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .user-role-badge {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.25);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .logout-btn, .admin-panel-btn {
+            background-color: rgba(230, 57, 70, 0.8);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover, .admin-panel-btn:hover {
+            background-color: var(--accent-color);
+        }
+
+        .admin-panel-btn {
+            background-color: rgba(40, 167, 69, 0.8);
+        }
+
+        .admin-panel-btn:hover {
+            background-color: var(--success-color);
         }
         
         .container {
@@ -121,6 +241,35 @@
             padding-bottom: 0.5rem;
             display: inline-block;
             width: 100%;
+            cursor: default;
+            transition: all 0.3s ease;
+        }
+
+        .section-title.editable {
+            cursor: pointer;
+            border-radius: 8px;
+            padding: 0.5rem;
+            position: relative;
+        }
+
+        .section-title.editable:hover {
+            background-color: rgba(26, 75, 140, 0.08);
+            opacity: 0.9;
+        }
+
+        .section-title.editable::after {
+            content: '✏️';
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .section-title.editable:hover::after {
+            opacity: 1;
         }
         
         .buttons-grid {
@@ -176,6 +325,108 @@
             opacity: 1;
             max-height: 100px;
         }
+
+        /* Indicador de edición en botón de etiqueta (admin) */
+        .apartado-btn.admin-editable {
+            position: relative;
+        }
+
+        .apartado-btn.admin-editable::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border: 2px dashed var(--warning-color);
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        .apartado-btn.admin-editable:hover::before {
+            opacity: 1;
+        }
+
+        .edit-badge {
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            background-color: var(--warning-color);
+            color: #212529;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 700;
+            z-index: 25;
+            display: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .edit-badge.visible {
+            display: block;
+        }
+
+        /* Modal de edición de título de sección */
+        .section-title-edit-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9995;
+            backdrop-filter: blur(5px);
+        }
+
+        .section-title-edit-overlay.hidden {
+            display: none;
+        }
+
+        .section-title-edit-modal {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .section-title-edit-modal h3 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Botón de añadir nueva etiqueta (solo admin) */
+        .add-etiqueta-btn {
+            background-color: var(--success-color);
+            color: white;
+            border: 2px dashed var(--success-color);
+            min-height: 100px;
+            width: 200px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .add-etiqueta-btn.visible {
+            display: flex;
+        }
+
+        .add-etiqueta-btn:hover {
+            background-color: transparent;
+            color: var(--success-color);
+            transform: translateY(-5px);
+        }
         
         .tooltip {
             position: absolute;
@@ -199,6 +450,34 @@
         .apartado-btn:hover .tooltip {
             opacity: 1;
         }
+
+        /* Botón eliminar etiqueta (solo admin) */
+        .delete-etiqueta-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 24px;
+            height: 24px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+        }
+
+        .delete-etiqueta-btn.visible {
+            display: flex;
+        }
+
+        .delete-etiqueta-btn:hover {
+            background-color: #c1121f;
+            transform: scale(1.1);
+        }
         
         footer {
             background-color: var(--dark-color);
@@ -207,7 +486,887 @@
             padding: 1.5rem;
             margin-top: 3rem;
         }
-        
+
+        footer p {
+            cursor: pointer;
+        }
+
+        footer p:hover {
+            opacity: 0.9;
+        }
+
+        /* ===== MODAL DE SELECCIÓN DE MODO ===== */
+        .mode-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+
+        .mode-overlay.hidden {
+            display: none;
+        }
+
+        .mode-modal {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+        }
+
+        .mode-modal::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            border-radius: 22px;
+            z-index: -1;
+        }
+
+        .mode-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .mode-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .mode-header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .mode-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .mode-option {
+            background-color: rgba(255, 255, 255, 0.95);
+            border: 3px solid transparent;
+            border-radius: 16px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .mode-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-color: white;
+        }
+
+        .mode-option.direct {
+            border-left: 5px solid var(--success-color);
+        }
+
+        .mode-option.edit {
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .mode-option-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .mode-option-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.3rem;
+        }
+
+        .mode-option-desc {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* ===== MODAL DE LOGIN PARA EDICIÓN ===== */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+
+        .login-overlay.hidden {
+            display: none;
+        }
+
+        .login-modal {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+        }
+
+        .login-modal::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            border-radius: 22px;
+            z-index: -1;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .login-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .back-to-mode-btn {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-mode-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            padding: 0.9rem 1.2rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            font-size: 1rem;
+            background-color: rgba(255, 255, 255, 0.95);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: white;
+            background-color: white;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .login-btn {
+            padding: 1rem;
+            background-color: white;
+            color: var(--primary-color);
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-error {
+            background-color: rgba(230, 57, 70, 0.9);
+            color: white;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .login-error.visible {
+            display: block;
+            animation: shakeError 0.5s ease;
+        }
+
+        @keyframes shakeError {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* ===== MODAL DE CAMBIO DE AÑO ===== */
+        .year-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9998;
+            backdrop-filter: blur(5px);
+        }
+
+        .year-modal-overlay.hidden {
+            display: none;
+        }
+
+        .year-modal {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 450px;
+            width: 90%;
+        }
+
+        .year-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .year-modal-header h3 {
+            color: var(--primary-color);
+            font-size: 1.4rem;
+        }
+
+        .close-modal-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #888;
+            transition: color 0.3s ease;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .close-modal-btn:hover {
+            background-color: #f0f0f0;
+            color: var(--accent-color);
+        }
+
+        .year-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .year-input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .year-input-group input {
+            width: 90px;
+            padding: 0.7rem;
+            border: 2px solid var(--secondary-color);
+            border-radius: 8px;
+            font-size: 1.1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .year-input-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(26, 75, 140, 0.2);
+        }
+
+        .year-preview {
+            background-color: var(--light-color);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .save-year-btn {
+            padding: 0.9rem;
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .save-year-btn:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        .cancel-year-btn {
+            padding: 0.9rem;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cancel-year-btn:hover {
+            background-color: #5a6268;
+        }
+
+        .year-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* ===== PANEL DE ADMINISTRACIÓN ===== */
+        .admin-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9997;
+            backdrop-filter: blur(5px);
+        }
+
+        .admin-overlay.hidden {
+            display: none;
+        }
+
+        .admin-panel {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .admin-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .admin-panel-header h3 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .admin-tab-btn {
+            padding: 0.7rem 1.2rem;
+            background-color: #e9ecef;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: var(--dark-color);
+        }
+
+        .admin-tab-btn:hover {
+            background-color: #dee2e6;
+        }
+
+        .admin-tab-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .admin-section {
+            display: none;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+        /* Gestión de usuarios */
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background-color: var(--light-color);
+            border-radius: 10px;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .user-info-admin {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar-admin {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .user-details h4 {
+            color: var(--dark-color);
+            margin-bottom: 0.2rem;
+        }
+
+        .user-details span {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-edit-user, .btn-delete-user {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-edit-user {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-edit-user:hover {
+            background-color: var(--primary-color);
+        }
+
+        .btn-delete-user {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-delete-user:hover {
+            background-color: #c1121f;
+        }
+
+        .add-user-form {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 2px dashed #dee2e6;
+        }
+
+        .add-user-form h4 {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row.single {
+            grid-template-columns: 1fr;
+        }
+
+        .form-row input {
+            padding: 0.8rem;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-row input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .btn-add-user {
+            padding: 0.8rem 1.5rem;
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-add-user:hover {
+            background-color: #218838;
+        }
+
+        /* Cambiar contraseña propia */
+        .change-password-section {
+            background-color: #fff3cd;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+        }
+
+        .change-password-section h4 {
+            color: #856404;
+            margin-bottom: 1rem;
+        }
+
+        .btn-change-password {
+            padding: 0.8rem 1.5rem;
+            background-color: var(--warning-color);
+            color: #212529;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-change-password:hover {
+            background-color: #e0a800;
+        }
+
+        /* Edición de contenido */
+        .editable-content-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .editable-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background-color: var(--light-color);
+            border-radius: 8px;
+        }
+
+        .editable-label {
+            font-weight: 600;
+            color: var(--primary-color);
+            min-width: 150px;
+        }
+
+        .editable-input {
+            flex: 1;
+            padding: 0.7rem;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .editable-input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .btn-save-content {
+            padding: 0.6rem 1.2rem;
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-save-content:hover {
+            background-color: #218838;
+        }
+
+        /* Modal de edición de etiqueta */
+        .etiqueta-edit-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9996;
+            backdrop-filter: blur(5px);
+        }
+
+        .etiqueta-edit-overlay.hidden {
+            display: none;
+        }
+
+        .etiqueta-edit-modal {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 550px;
+            width: 90%;
+        }
+
+        .etiqueta-edit-modal h3 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .etiqueta-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        /* Modal de confirmación personalizado */
+        .confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+
+        .confirm-overlay.hidden {
+            display: none;
+        }
+
+        .confirm-dialog {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 25px 70px rgba(220, 53, 69, 0.4);
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            animation: confirmSlideIn 0.3s ease;
+        }
+
+        @keyframes confirmSlideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(-30px) scale(0.95);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .confirm-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: confirmShake 0.5s ease;
+        }
+
+        @keyframes confirmShake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+
+        .confirm-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 0.8rem;
+        }
+
+        .confirm-message {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+
+        .confirm-etiqueta-info {
+            background-color: #fff5f5;
+            border: 2px solid #fecaca;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .confirm-etiqueta-info strong {
+            color: var(--accent-color);
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn-confirm-delete {
+            padding: 0.9rem 2rem;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-confirm-delete:hover {
+            background-color: #c1121f;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(230, 57, 70, 0.4);
+        }
+
+        .btn-cancel-confirm {
+            padding: 0.9rem 2rem;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel-confirm:hover {
+            background-color: #5a6268;
+        }
+
+        /* Indicadores visuales para edición */
+        .edit-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background-color: var(--warning-color);
+            color: #212529;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .edit-instructions {
+            background-color: #e7f3ff;
+            border: 1px solid #b6d4fe;
+            border-radius: 8px;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            color: #084298;
+        }
+
+        .edit-instructions ul {
+            margin: 0.5rem 0 0 1.2rem;
+        }
+
+        .edit-instructions li {
+            margin-bottom: 0.3rem;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -223,6 +1382,34 @@
                 width: 100%;
                 max-width: 300px;
             }
+
+            .user-panel {
+                position: static;
+                justify-content: center;
+                margin-top: 1rem;
+                flex-wrap: wrap;
+            }
+
+            header {
+                padding: 1rem;
+            }
+
+            .mode-options {
+                gap: 1rem;
+            }
+
+            .mode-option {
+                padding: 1.2rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-panel {
+                width: 98%;
+                padding: 1.5rem;
+            }
         }
         
         @media (max-width: 480px) {
@@ -233,356 +1420,1530 @@
             header h1 {
                 font-size: 1.5rem;
             }
+
+            .user-panel {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .login-modal, .mode-modal {
+                padding: 1.5rem;
+            }
+
+            .year-modal, .etiqueta-edit-modal {
+                padding: 1.5rem;
+            }
+
+            .mode-option-title {
+                font-size: 1.1rem;
+            }
+
+            .user-item {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .user-actions {
+                justify-content: flex-end;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- MODAL DE SELECCIÓN DE MODO -->
+    <div id="modeOverlay" class="mode-overlay">
+        <div class="mode-modal">
+            <div class="mode-header">
+                <h2>📚 Plan de Centro</h2>
+                <p>IES Virgen de Villadiego - Selecciona modo de acceso</p>
+            </div>
+            <div class="mode-options">
+                <div class="mode-option direct" id="directAccessBtn">
+                    <div class="mode-option-icon">👁️</div>
+                    <div class="mode-option-title">Acceso Directo</div>
+                    <div class="mode-option-desc">Accede inmediatamente al contenido del Plan de Centro en modo solo lectura. No requiere autenticación.</div>
+                </div>
+                <div class="mode-option edit" id="editAccessBtn">
+                    <div class="mode-option-icon">✏️</div>
+                    <div class="mode-option-title">Edición</div>
+                    <div class="mode-option-desc">Accede con permisos de administrador para poder modificar contenidos, gestionar usuarios y cambiar el año escolar.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE LOGIN (PARA MODO EDICIÓN) -->
+    <div id="loginOverlay" class="login-overlay hidden">
+        <div class="login-modal">
+            <button type="button" class="back-to-mode-btn" id="backToModeBtn">← Volver</button>
+            <div class="login-header">
+                <h2>🔐 Acceso Administrador</h2>
+                <p>Introduce tus credenciales para acceder en modo edición</p>
+            </div>
+            <div id="loginError" class="login-error">
+                Usuario o contraseña incorrectos
+            </div>
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="username">Usuario</label>
+                    <input type="text" id="username" placeholder="Introduce tu usuario" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" placeholder="Introduce tu contraseña" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="login-btn">Acceder como Administrador</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE CAMBIO DE AÑO -->
+    <div id="yearModalOverlay" class="year-modal-overlay hidden">
+        <div class="year-modal">
+            <div class="year-modal-header">
+                <h3>📅 Cambiar Curso Escolar</h3>
+                <button type="button" class="close-modal-btn" id="closeYearModal">&times;</button>
+            </div>
+            <form class="year-form" id="yearForm">
+                <div class="form-group">
+                    <label>Año de inicio del curso:</label>
+                    <div class="year-input-group">
+                        <input type="number" id="yearStart" min="2000" max="2099" value="2025">
+                        <span>-</span>
+                        <input type="number" id="yearEnd" min="2000" max="2099" value="2026" readonly style="background-color: #e9ecef;">
+                    </div>
+                </div>
+                <div class="year-preview">
+                    Vista previa: <span id="yearPreviewText">Curso 2025-2026</span>
+                </div>
+                <div class="year-buttons">
+                    <button type="submit" class="save-year-btn">Guardar Cambios</button>
+                    <button type="button" class="cancel-year-btn" id="cancelYearBtn">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+    <!-- Modal de edición de etiqueta individual -->
+    <div id="etiquetaEditOverlay" class="etiqueta-edit-overlay hidden">
+        <div class="etiqueta-edit-modal">
+            <h3>✏️ Editar Etiqueta <span class="edit-indicator">Modo Edición</span></h3>
+            <div class="edit-instructions">
+                <strong>💡 Instrucciones:</strong>
+                <ul>
+                    <li>Modifica los campos que desees cambiar</li>
+                    <li>Puedes editar el código, nombre y enlace URL</li>
+                    <li>Haz clic en "Guardar Cambios" cuando termines</li>
+                </ul>
+            </div>
+            <form class="etiqueta-form" id="editEtiquetaForm">
+                <input type="hidden" id="editEtiquetaIndex">
+                <input type="hidden" id="editEtiquetaSeccion">
+                <div class="form-group">
+                    <label for="editEtiquetaCodigo"><strong>Código de la etiqueta:</strong></label>
+                    <input type="text" id="editEtiquetaCodigo" placeholder="Ej: APARTADO A" required style="font-weight: 600; font-size: 1.1rem;">
+                </div>
+                <div class="form-group">
+                    <label for="editEtiquetaNombre"><strong>Nombre descriptivo:</strong></label>
+                    <input type="text" id="editEtiquetaNombre" placeholder="Ej: LÍNEAS GENERALES DE ACTUACIÓN" required style="font-size: 1.05rem;">
+                </div>
+                <div class="form-group">
+                    <label for="editEtiquetaEnlace"><strong>URL del documento (enlace):</strong></label>
+                    <input type="url" id="editEtiquetaEnlace" placeholder="https://... (dejar vacío o # si no tiene)">
+                </div>
+                <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 0.5rem;">
+                    <strong>Vista previa en tiempo real:</strong>
+                    <div id="editPreview" style="margin-top: 0.5rem; padding: 0.8rem; background: white; border-radius: 6px; border-left: 4px solid var(--primary-color);"></div>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button type="submit" class="save-year-btn" style="flex: 1;">💾 Guardar Cambios</button>
+                    <button type="button" class="cancel-year-btn" id="cancelEditEtiqueta" style="flex: 1;">❌ Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Añadir Nueva Etiqueta -->
+    <div id="addEtiquetaOverlay" class="etiqueta-edit-overlay hidden">
+        <div class="etiqueta-edit-modal">
+            <h3>➕ Añadir Nueva Etiqueta <span class="edit-indicator">Nueva</span></h3>
+            <form id="addEtiquetaForm" class="etiqueta-form">
+                <input type="hidden" id="addEtiquetaSeccion">
+                <div class="form-group">
+                    <label for="addEtiquetaCodigo"><strong>Código de la etiqueta:</strong></label>
+                    <input type="text" id="addEtiquetaCodigo" placeholder="Ej: APARTADO X" required style="font-size: 1.05rem;">
+                </div>
+                <div class="form-group">
+                    <label for="addEtiquetaNombre"><strong>Nombre descriptivo:</strong></label>
+                    <input type="text" id="addEtiquetaNombre" placeholder="Ej: NUEVO DOCUMENTO" required style="font-size: 1.05rem;">
+                </div>
+                <div class="form-group">
+                    <label for="addEtiquetaEnlace"><strong>URL del documento (enlace):</strong></label>
+                    <input type="url" id="addEtiquetaEnlace" placeholder="https://... (dejar # si no tiene)" value="#">
+                </div>
+                <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 0.5rem;">
+                    <strong>Vista previa:</strong>
+                    <div id="addPreview" style="margin-top: 0.5rem; padding: 0.8rem; background: white; border-radius: 6px; border-left: 4px solid var(--success-color);"></div>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button type="submit" class="save-year-btn" style="flex: 1;">➕ Añadir Etiqueta</button>
+                    <button type="button" class="cancel-year-btn" id="cancelAddEtiqueta" style="flex: 1;">❌ Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Copias de Seguridad (Backup/Restore) -->
+    <div id="backupOverlay" class="etiqueta-edit-overlay hidden">
+        <div class="etiqueta-edit-modal" style="max-width: 700px;">
+            <h3>💾 Copias de Seguridad <span class="edit-indicator">Admin</span></h3>
+            
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                <button type="button" id="createBackupBtn" class="save-year-btn" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    📦 Crear Copia de Seguridad Ahora
+                </button>
+                <button type="button" id="refreshBackupsBtn" class="cancel-year-btn" style="flex: 0.3rem; display: flex; align-items: center; justify-content: center;" title="Actualizar lista">
+                    🔄
+                </button>
+            </div>
+
+            <div id="backupStatus" style="display: none; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center; font-weight: 600;"></div>
+
+            <h4 style="color: var(--primary-color); margin-bottom: 1rem;">📋 Copias de Seguridad Almacenadas</h4>
+            
+            <div id="backupsList" style="max-height: 400px; overflow-y: auto;">
+                <p style="color: #666; text-align: center; padding: 2rem;">Cargando copias de seguridad...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edición de Título de Sección -->
+    <div id="sectionTitleEditOverlay" class="section-title-edit-overlay hidden">
+        <div class="section-title-edit-modal">
+            <h3>✏️ Editar Título de Sección</h3>
+            <form id="editSectionTitleForm" style="display: flex; flex-direction: column; gap: 1.2rem;">
+                <input type="hidden" id="editSectionId">
+                <div class="form-group">
+                    <label for="editSectionTitleInput"><strong>Nuevo título:</strong></label>
+                    <input type="text" id="editSectionTitleInput" placeholder="Introduce el nuevo título..." required style="padding: 0.9rem 1.2rem; border: 2px solid #dee2e6; border-radius: 10px; font-size: 1.05rem;">
+                </div>
+                <div style="background: #e7f3ff; padding: 1rem; border-radius: 8px; font-size: 0.9rem; color: #084298;">
+                    <strong>💡 Nota:</strong> Este cambio también actualizará el nombre de la pestaña correspondiente.
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="save-year-btn" style="flex: 1;">💾 Guardar Título</button>
+                    <button type="button" class="cancel-year-btn" id="cancelEditSectionTitle" style="flex: 1;">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Eliminación -->
+    <div id="confirmOverlay" class="confirm-overlay hidden">
+        <div class="confirm-dialog">
+            <div class="confirm-icon">🗑️</div>
+            <h3 class="confirm-title">¿Eliminar Etiqueta?</h3>
+            <p class="confirm-message">Esta acción no se puede deshacer. La etiqueta será eliminada permanentemente.</p>
+            <div class="confirm-etiqueta-info" id="confirmEtiquetaInfo">
+                <strong>Etiqueta a eliminar:</strong>
+                <span id="confirmEtiquetaDetails"></span>
+            </div>
+            <div class="confirm-buttons">
+                <button type="button" class="btn-cancel-confirm" id="btnCancelConfirm">Cancelar</button>
+                <button type="button" class="btn-confirm-delete" id="btnConfirmDelete">Sí, Eliminar</button>
+            </div>
+        </div>
+    </div>
+
     <header>
         <div class="header-content">
-            <h1>Plan de Centro - IES Virgen de Villadiego</h1>
-            <p>Curso 2025-2026</p>
+            <h1 id="appTitle" title="Click para editar (admin)">Plan de Centro - IES Virgen de Villadiego</h1>
+            <p>
+                <span class="year-display">
+                    <span class="year-text" id="yearDisplay">Curso 2025-2026</span>
+                    <button type="button" class="edit-year-btn" id="editYearBtn" title="Cambiar año escolar">
+                        ✏️ Cambiar año
+                    </button>
+                </span>
+            </p>
+            <div class="user-panel" id="userPanel" style="display: none;">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <span id="userName">Usuario</span>
+                    <span class="user-role-badge" id="userRole">Rol</span>
+                </div>
+                <button type="button" class="admin-panel-btn" id="backupBtn" style="display: none;" title="Copias de Seguridad">💾 Backup</button>
+                <button type="button" class="logout-btn" id="logoutBtn">Cerrar Sesión</button>
+            </div>
         </div>
     </header>
     
     <div class="container">
         <div class="nav-tabs">
-            <button class="tab-btn active" data-target="proyecto-educativo">Proyecto Educativo</button>
-            <button class="tab-btn" data-target="reglamento-organizacion">Reglamento de Organización y Funcionamiento</button>
-            <button class="tab-btn" data-target="proyecto-gestion">Proyecto de Gestión</button>
-            <button class="tab-btn" data-target="plan-actuacion-digital">Plan de Actuación Digital</button>
-            <button class="tab-btn" data-target="plan-mejora">Plan de Mejora</button>
+            <button class="tab-btn active" data-target="proyecto-educativo" id="tab-proyecto-educativo">Proyecto Educativo</button>
+            <button class="tab-btn" data-target="reglamento-organizacion" id="tab-reglamento-organizacion">Reglamento de Organización y Funcionamiento</button>
+            <button class="tab-btn" data-target="proyecto-gestion" id="tab-proyecto-gestion">Proyecto de Gestión</button>
+            <button class="tab-btn" data-target="plan-actuacion-digital" id="tab-plan-actuacion-digital">Plan de Actuación Digital</button>
+            <button class="tab-btn" data-target="plan-mejora" id="tab-plan-mejora">Plan de Mejora</button>
         </div>
         
         <!-- PROYECTO EDUCATIVO -->
         <div id="proyecto-educativo" class="section active">
-            <h2 class="section-title">Proyecto Educativo</h2>
-            <div class="buttons-grid">
+            <h2 class="section-title" id="title-proyecto-educativo" title="Click para editar (admin)">Proyecto Educativo</h2>
+            <div class="buttons-grid" id="grid-proyecto-educativo">
                 <!-- Los botones se generarán con JavaScript -->
             </div>
         </div>
         
         <!-- REGLAMENTO DE ORGANIZACIÓN Y FUNCIONAMIENTO -->
         <div id="reglamento-organizacion" class="section">
-            <h2 class="section-title">Reglamento de Organización y Funcionamiento</h2>
-            <div class="buttons-grid">
+            <h2 class="section-title" id="title-reglamento-organizacion" title="Click para editar (admin)">Reglamento de Organización y Funcionamiento</h2>
+            <div class="buttons-grid" id="grid-reglamento-organizacion">
                 <!-- Los botones se generarán con JavaScript -->
             </div>
         </div>
         
         <!-- PROYECTO DE GESTIÓN -->
         <div id="proyecto-gestion" class="section">
-            <h2 class="section-title">Proyecto de Gestión</h2>
-            <div class="buttons-grid">
+            <h2 class="section-title" id="title-proyecto-gestion" title="Click para editar (admin)">Proyecto de Gestión</h2>
+            <div class="buttons-grid" id="grid-proyecto-gestion">
                 <!-- Los botones se generarán con JavaScript -->
             </div>
         </div>
         
         <!-- PLAN DE ACTUACIÓN DIGITAL -->
         <div id="plan-actuacion-digital" class="section">
-            <h2 class="section-title">Plan de Actuación Digital</h2>
-            <div class="buttons-grid">
+            <h2 class="section-title" id="title-plan-actuacion-digital" title="Click para editar (admin)">Plan de Actuación Digital</h2>
+            <div class="buttons-grid" id="grid-plan-actuacion-digital">
                 <!-- Los botones se generarán con JavaScript -->
             </div>
         </div>
         
         <!-- PLAN DE MEJORA -->
         <div id="plan-mejora" class="section">
-            <h2 class="section-title">Plan de Mejora</h2>
-            <div class="buttons-grid">
+            <h2 class="section-title" id="title-plan-mejora" title="Click para editar (admin)">Plan de Mejora</h2>
+            <div class="buttons-grid" id="grid-plan-mejora">
                 <!-- Los botones se generarán con JavaScript -->
             </div>
         </div>
     </div>
     
     <footer>
-        <p>2025 - Ángel Millán León</p>
+        <p id="footerText" title="Click para editar (admin)">2025 - Ángel Millán León</p>
     </footer>
 
     <script>
-        // Datos de los apartados del Plan de Centro con enlaces corregidos del documento Word
-        const apartados = {
+        // ============================================
+        // CONFIGURACIÓN DE FIREBASE
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZrgrH46VBv56E9i8MUzwtxyoQf8t7He0",
+            authDomain: "iesvdv-96a18.firebaseapp.com",
+            databaseURL: "https://iesvdv-96a18-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "iesvdv-96a18",
+            storageBucket: "iesvdv-96a18.firebasestorage.app",
+            messagingSenderId: "526669274609",
+            appId: "1:526669274609:web:f60994c27fd38e3d467850",
+            measurementId: "G-DR3PDDN74W"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // ============================================
+        // ESTADO DE LA APLICACIÓN
+        // ============================================
+        let currentUser = null;
+        let currentYear = { start: 2025, end: 2026 };
+        let accessMode = null;
+        let appContent = {
+            title: 'Plan de Centro - IES Virgen de Villadiego',
+            footer: '2025 - Ángel Millán León',
+            sections: {
+                'proyecto-educativo': { title: 'Proyecto Educativo' },
+                'reglamento-organizacion': { title: 'Reglamento de Organización y Funcionamiento' },
+                'proyecto-gestion': { title: 'Proyecto de Gestión' },
+                'plan-actuacion-digital': { title: 'Plan de Actuación Digital' },
+                'plan-mejora': { title: 'Plan de Mejora' }
+            }
+        };
+
+        // Datos por defecto de los apartados
+        let apartados = {
             "proyecto-educativo": [
-                { 
-                    codigo: "APARTADO 0", 
-                    nombre: "ESTUDIO DEL CONTEXTO",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vS5YfULKbvI1zDtcTQBRGcwhqUwLls1n5lFph-egeudVr5n6Q80Y4rSsAjeDLvVpQwMTdmIDVcjsrlK/pub"
-                },
-                { 
-                    codigo: "APARTADO A", 
-                    nombre: "LÍNEAS GENERALES DE ACTUACIÓN PEDAGÓGICA",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTbY79inB7jT93DQIvNTMFFjvVopt9FVk_7t2u3MrFcU9G2HQ67tKRruaZxgjAiu0LdXpfxSswbT8HZ/pub"
-                },
-                { 
-                    codigo: "APARTADO B", 
-                    nombre: "MEDIDAS PARA LA MEJORA DEL RENDIMIENTO ESCOLAR",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vQ05CoWMnfqyFXZ8-8KjAFbjlkoFKnebhqqRW44WtJDoMEksRAfPzOm5JWDWxR3sjStEcANqmvsi-8N/pub"
-                },
-                { 
-                    codigo: "APARTADO C", 
-                    nombre: "PROGRAMACIONES DIDÁCTICAS",
-                    enlace: "#"
-                },
-                { 
-                    codigo: "APARTADO D", 
-                    nombre: "CRITERIOS PEDAGÓGICOS PARA DETERMINAR LOS ÓRGANOS DE COORDINACIÓN DOCENTE Y EL HORARIO DE LOS RESPONSABLES",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTwBr0Qbys4aWOEYrCHwMLIJc9x0uNv_Q0bHLCGH4FGdqsK-mnEigHWfaCeN35-7v7-xbDR8nRNFEXu/pub"
-                },
-                { 
-                    codigo: "APARTADO E", 
-                    nombre: "PROCEDIMIENTOS, CRITERIOS DE EVALUACIÓN Y DE PROMOCIÓN",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vRmh1SQVVm4dAphLfCladNtdT-6do8i3S0oS6DyEJDv85bpkVttUJ8art1FnzxNCm6x3hQVErlWhpvy/pub"
-                },
-                { 
-                    codigo: "APARTADO F", 
-                    nombre: "ATENCIÓN A LA DIVERSIDAD",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vQx2fT9axf_Y9_xgfHPTMUQ34orETi8CHovd7SnuMOEsbDbMb1HVgExy0XqEjstiMnQBfDY1PETwdQw/pub"
-                },
-                { 
-                    codigo: "APARTADO G", 
-                    nombre: "ACTIVIDADES DE RECUPERACIÓN",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vRF2GuifNdVmLyeI0Qs2I_qnK_p0Qi4z1DFjW3YR5fpoZshh3k9tgTtpyIslbcwYCp1dBmLTGVuDeVH/pub"
-                },
-                { 
-                    codigo: "APARTADO H", 
-                    nombre: "PLAN DE ORIENTACIÓN Y ACCIÓN TUTORIAL",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTa_lzihLpKsfdYZegeFy5Iok_x3-MI0prSpibmHacM0IX4UZguSMzMvXMiocd8CVu1ICAMf5QKR0wI/pub"
-                },
-                { 
-                    codigo: "APARTADO I", 
-                    nombre: "PROCEDIMIENTOS PARA SUSCRIBIR COMPROMISOS CON LAS FAMILIAS",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vRJ8uOGHObGlFwFNa_kA8csWcLOZ0TPae6Gz3Q_s7wSOYafJx2CkA8GNv8dl4GK6gf0Wje9J6duNX4s/pub"
-                },
-                { 
-                    codigo: "APARTADO J", 
-                    nombre: "PLAN DE CONVIVENCIA",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vQGHMOIVxgvYFVdrRggw4ZSEPfZIY3yCChpzmPpDY2k4Y_3DjSYfe7GAT3Xe7o7ee1DeAZihICoI8J2/pub"
-                },
-                { 
-                    codigo: "APARTADO K", 
-                    nombre: "PLAN DE FORMACIÓN DEL PROFESORADO",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vS6J8eOzFygftoSdLEfDZqBb3-yLsbF5qlVkoK1W1rb2mEB-_XYzZ03S1eBDiM4g_qwe3eeRbslKsfr/pub"
-                },
-                { 
-                    codigo: "APARTADO L", 
-                    nombre: "CRITERIOS PARA LA ORGANIZACIÓN DEL TIEMPO ESCOLAR",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vSUCSVqgjdc5jMVxSGavFrGurxIrslaQKZIQu3GYUyxUEUlvHWGpRPUobqLic69CzJY6Lmmx0WuEySJ/pub"
-                },
-                { 
-                    codigo: "APARTADO M", 
-                    nombre: "CRITERIOS METODOLÓGICOS GENERALES",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vQ2qahlCztTvLwed8qbam5cJC_EyyHE6lsee_wL7RRmVaQH1xEUNSz9A9eB-N-c_r1lhXVOBDflgzA0/pub"
-                },
-                { 
-                    codigo: "APARTADO N", 
-                    nombre: "PROCEDIMIENTO DE EVALUACIÓN INTERNA",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTRXI9ukeHOKMhGWostbt_4CD2dTF08sjEaX9jNFsba0cVIX4wGInxeM4qei2wf9izCJGtKrchOIEVe/pub"
-                },
-                { 
-                    codigo: "APARTADO Ñ", 
-                    nombre: "CRITERIOS PARA EL AGRUPAMIENTO DEL ALUMNADO Y LA ASIGNACIÓN DE TUTORÍAS",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vT6-O6ufrYqeAFcvcyUjHnuBmGn-kH5NyJb5X6-392WG77uy7u6ZJHReDj5UbQ9mLO2Is4HnM_VDPPu/pub"
-                },
-                { 
-                    codigo: "APARTADO O", 
-                    nombre: "CRITERIOS PARA LA OFERTA DE OPTATIVAS",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTf-Twquca1mGmuvYsfI-mxYxpI5iy41tMJ4hKvDGlvJr2MeIeDKAlV_xUNb3IhNKZHKB6dXDxatsNJ/pub"
-                },
-                { 
-                    codigo: "APARTADO Q", 
-                    nombre: "CRITERIOS PARA LA ELABORACIÓN DE PROGRAMACIONES DIDÁCTICAS",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vR3DPbnVgYXbw5mNCOscq9uXoUS_43kFdUbUUdQxlappSUicQndguVwNrX7WR8shB3drfGSHt5lUgji/pub"
-                },
-                { 
-                    codigo: "APARTADO R", 
-                    nombre: "PLANES ESTRATÉGICOS DEL IES",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTXsUxTMn8ndQs7gA0gy99pc5aLvkH3GKcR1dYmg1xxWiDdfQmdvd4ojCascqGKt9mhtmLD8md3ZCyY/pub"
-                },
-                { 
-                    codigo: "APARTADO S", 
-                    nombre: "PLANES Y PROGRAMAS DEL IES",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vSjG5BVWM7mDn0lYwEcrOhQxRkNM2QHRAtRu48ik99OfS6lIOwq6_bYKYkDbEuGRTbtb-bR_-iSmd2m/pub"
-                },
-                { 
-                    codigo: "APARTADO T", 
-                    nombre: "TRATAMIENTO DE LA LECTURA",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vQWh5cK5NK8MVjPitjdjtDecVzzvamQmOiHGUXvTAPE7NIyx9a9rrutghCCiwW1waQJ5crWjIsKPq-N/pub"
-                },
-                { 
-                    codigo: "APARTADO U", 
-                    nombre: "TRATAMIENTO DEL RAZONAMIENTO MATEMÁTICO",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTVqXE3UbuEfWouWgwaYc5cNZVcZvrvLOdPRKaFTnzeDVtiRrkZyRnqBW7R3qwxslVc0vc56NgD0vtR/pub"
-                }
+                { codigo: "APARTADO 0", nombre: "ESTUDIO DEL CONTEXTO", enlace: "https://docs.google.com/document/d/e/2PACX-1vS5YfULKbvI1zDtcTQBRGcwhqUwLls1n5lFph-egeudVr5n6Q80Y4rSsAjeDLvVpQwMTdmIDVcjsrlK/pub" },
+                { codigo: "APARTADO A", nombre: "LÍNEAS GENERALES DE ACTUACIÓN PEDAGÓGICA", enlace: "https://docs.google.com/document/d/e/2PACX-1vTbY79inB7jT93DQIvNTMFFjvVopt9FVk_7t2u3MrFcU9G2HQ67tKRruaZxgjAiu0LdXpfxSswbT8HZ/pub" },
+                { codigo: "APARTADO B", nombre: "MEDIDAS PARA LA MEJORA DEL RENDIMIENTO ESCOLAR", enlace: "https://docs.google.com/document/d/e/2PACX-1vQ05CoWMnfqyFXZ8-8KjAFbjlkoFKnebhqqRW44WtJDoMEksRAfPzOm5JWDWxR3sjStEcANqmvsi-8N/pub" },
+                { codigo: "APARTADO C", nombre: "PROGRAMACIONES DIDÁCTICAS", enlace: "#" },
+                { codigo: "APARTADO D", nombre: "CRITERIOS PEDAGÓGICOS PARA DETERMINAR LOS ÓRGANOS DE COORDINACIÓN DOCENTE Y EL HORARIO DE LOS RESPONSABLES", enlace: "https://docs.google.com/document/d/e/2PACX-1vTwBr0Qbys4aWOEYrCHwMLIJc9x0uNv_Q0bHLCGH4FGdqsK-mnEigHWfaCeN35-7v7-xbDR8nRNFEXu/pub" },
+                { codigo: "APARTADO E", nombre: "PROCEDIMIENTOS, CRITERIOS DE EVALUACIÓN Y DE PROMOCIÓN", enlace: "https://docs.google.com/document/d/e/2PACX-1vRmh1SQVVm4dAphLfCladNtdT-6do8i3S0oS6DyEJDv85bpkVttUJ8art1FnzxNCm6x3hQVErlWhpvy/pub" },
+                { codigo: "APARTADO F", nombre: "ATENCIÓN A LA DIVERSIDAD", enlace: "https://docs.google.com/document/d/e/2PACX-1vQx2fT9axf_Y9_xgfHPTMUQ34orETi8CHovd7SnuMOEsbDbMb1HVgExy0XqEjstiMnQBfDY1PETwdQw/pub" },
+                { codigo: "APARTADO G", nombre: "ACTIVIDADES DE RECUPERACIÓN", enlace: "https://docs.google.com/document/d/e/2PACX-1vRF2GuifNdVmLyeI0Qs2I_qnK_p0Qi4z1DFjW3YR5fpoZshh3k9tgTtpyIslbcwYCp1dBmLTGVuDeVH/pub" },
+                { codigo: "APARTADO H", nombre: "PLAN DE ORIENTACIÓN Y ACCIÓN TUTORIAL", enlace: "https://docs.google.com/document/d/e/2PACX-1vTa_lzihLpKsfdYZegeFy5Iok_x3-MI0prSpibmHacM0IX4UZguSMzMvXMiocd8CVu1ICAMf5QKR0wI/pub" },
+                { codigo: "APARTADO I", nombre: "PROCEDIMIENTOS PARA SUSCRIBIR COMPROMISOS CON LAS FAMILIAS", enlace: "https://docs.google.com/document/d/e/2PACX-1vRJ8uOGHObGlFwFNa_kA8csWcLOZ0TPae6Gz3Q_s7wSOYafJx2CkA8GNv8dl4GK6gf0Wje9J6duNX4s/pub" },
+                { codigo: "APARTADO J", nombre: "PLAN DE CONVIVENCIA", enlace: "https://docs.google.com/document/d/e/2PACX-1vQGHMOIVxgvYFVdrRggw4ZSEPfZIY3yCChpzmPpDY2k4Y_3DjSYfe7GAT3Xe7o7ee1DeAZihICoI8J2/pub" },
+                { codigo: "APARTADO K", nombre: "PLAN DE FORMACIÓN DEL PROFESORADO", enlace: "https://docs.google.com/document/d/e/2PACX-1vS6J8eOzFygftoSdLEfDZqBb3-yLsbF5qlVkoK1W1rb2mEB-_XYzZ03S1eBDiM4g_qwe3eeRbslKsfr/pub" },
+                { codigo: "APARTADO L", nombre: "CRITERIOS PARA LA ORGANIZACIÓN DEL TIEMPO ESCOLAR", enlace: "https://docs.google.com/document/d/e/2PACX-1vSUCSVqgjdc5jMVxSGavFrGurxIrslaQKZIQu3GYUyxUEUlvHWGpRPUobqLic69CzJY6Lmmx0WuEySJ/pub" },
+                { codigo: "APARTADO M", nombre: "CRITERIOS METODOLÓGICOS GENERALES", enlace: "https://docs.google.com/document/d/e/2PACX-1vQ2qahlCztTvLwed8qbam5cJC_EyyHE6lsee_wL7RRmVaQH1xEUNSz9A9eB-N-c_r1lhXVOBDflgzA0/pub" },
+                { codigo: "APARTADO N", nombre: "PROCEDIMIENTO DE EVALUACIÓN INTERNA", enlace: "https://docs.google.com/document/d/e/2PACX-1vTRXI9ukeHOKMhGWostbt_4CD2dTF08sjEaX9jNFsba0cVIX4wGInxeM4qei2wf9izCJGtKrchOIEVe/pub" },
+                { codigo: "APARTADO Ñ", nombre: "CRITERIOS PARA EL AGRUPAMIENTO DEL ALUMNADO Y LA ASIGNACIÓN DE TUTORÍAS", enlace: "https://docs.google.com/document/d/e/2PACX-1vT6-O6ufrYqeAFcvcyUjHnuBmGn-kH5NyJb5X6-392WG77uy7u6ZJHReDj5UbQ9mLO2Is4HnM_VDPPu/pub" },
+                { codigo: "APARTADO O", nombre: "CRITERIOS PARA LA OFERTA DE OPTATIVAS", enlace: "https://docs.google.com/document/d/e/2PACX-1vTf-Twquca1mGmuvYsfI-mxYxpI5iy41tMJ4hKvDGlvJr2MeIeDKAlV_xUNb3IhNKZHKB6dXDxatsNJ/pub" },
+                { codigo: "APARTADO Q", nombre: "CRITERIOS PARA LA ELABORACIÓN DE PROGRAMACIONES DIDÁCTICAS", enlace: "https://docs.google.com/document/d/e/2PACX-1vR3DPbnVgYXbw5mNCOscq9uXoUS_43kFdUbUUdQxlappSUicQndguVwNrX7WR8shB3drfGSHt5lUgji/pub" },
+                { codigo: "APARTADO R", nombre: "PLANES ESTRATÉGICOS DEL IES", enlace: "https://docs.google.com/document/d/e/2PACX-1vTXsUxTMn8ndQs7gA0gy99pc5aLvkH3GKcR1dYmg1xxWiDdfQmdvd4ojCascqGKt9mhtmLD8md3ZCyY/pub" },
+                { codigo: "APARTADO S", nombre: "PLANES Y PROGRAMAS DEL IES", enlace: "https://docs.google.com/document/d/e/2PACX-1vSjG5BVWM7mDn0lYwEcrOhQxRkNM2QHRAtRu48ik99OfS6lIOwq6_bYKYkDbEuGRTbtb-bR_-iSmd2m/pub" },
+                { codigo: "APARTADO T", nombre: "TRATAMIENTO DE LA LECTURA", enlace: "https://docs.google.com/document/d/e/2PACX-1vQWh5cK5NK8MVjPitjdjtDecVzzvamQmOiHGUXvTAPE7NIyx9a9rrutghCCiwW1waQJ5crWjIsKPq-N/pub" },
+                { codigo: "APARTADO U", nombre: "TRATAMIENTO DEL RAZONAMIENTO MATEMÁTICO", enlace: "https://docs.google.com/document/d/e/2PACX-1vTVqXE3UbuEfWouWgwaYc5cNZVcZvrvLOdPRKaFTnzeDVtiRrkZyRnqBW7R3qwxslVc0vc56NgD0vtR/pub" }
             ],
             "reglamento-organizacion": [
-                { 
-                    codigo: "APARTADO 0", 
-                    nombre: "ÓRGANOS COLEGIADOS DE GOBIERNO",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vQaQGI-6D4QR9v0NyitcxOJHUEM42slOG4V-OFEncvkVxEE-P6XvI78gDB53gBahMv4uoZPkzDkKWWk/pub"
-                },
-                { 
-                    codigo: "APARTADO 1", 
-                    nombre: "EL EQUIPO DIRECTIVO",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vQDsiznmZI47OPrJgLSIq1w5NMqHx7wNld7OYCgFo1sBQ5Qy-d6_-FUZ-JYMfLOG7GLJrDgxHMBFlaB/pub"
-                },
-                { 
-                    codigo: "APARTADO A", 
-                    nombre: "CAUCES DE PARTICIPACIÓN DE LA COMUNIDAD EDUCATIVA",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vQoFJqKUSGIP1pr9JKCVCAxfUrV0o-EnkZ9ZmNIKllPoT7XXTNB6ieZk6EFjPwVAp2hAA-5bxG8dbpu/pub"
-                },
-                { 
-                    codigo: "APARTADO B", 
-                    nombre: "CRITERIOS Y PROCEDIMIENTOS QUE GARANTICEN EL RIGOR Y LA TRANSPARENCIA EN LA TOMA DE DECISIONES",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTYAuHZfDszFOZyrZpN-nFBA8a-wXZzoiftM2BDKBkZ1VCMbd9Nl1OdL0XchBcDudB0GGGcYgeKsmvS/pub"
-                },
-                { 
-                    codigo: "APARTADO C", 
-                    nombre: "ORGANIZACIÓN DE ESPACIOS, INSTALACIONES Y RECURSOS MATERIALES",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vSPAq2aqnGFqq5bk22Pgs0Cu9MUlfbRQP8S4t65VfLnFXaTyIHM7mZVtcDHNUUGkEUFn3xtIaeCT0k5/pub"
-                },
-                { 
-                    codigo: "APARTADO D", 
-                    nombre: "ORGANIZACIÓN DEL CENTRO",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTms8e_GmWlhD26g-T7stm4bfE53XmSy6iZ8Cavu9OEKW_UrvFo9T8fWWY0HfWvYmj-FbZ8EJIBPz1V/pub"
-                },
-                { 
-                    codigo: "APARTADO E", 
-                    nombre: "PROGRAMA DE GRATUIDAD DE LIBROS DE TEXTO",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTh1DK3kc0Kh2fbTKNZYUDYwLUSK8GHzhRvOgPOSeoDAQ-NwLIf7Y14chO7FS2_o9vHSCGfS-FZxH2w/pub"
-                },
-                { 
-                    codigo: "APARTADO G", 
-                    nombre: "PROCEDIMIENTO PARA LA DESIGNACIÓN DE LOS MIEMBROS DEL EQUIPO DE EVALUACIÓN",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vRDJ-g0Hby8ezDyTVCOWfsBKhJAYPtt_dIedhigtydPIfv__IjrcA2o6td3NgimIma8aWom4m2P1gaR/pub"
-                },
-                { 
-                    codigo: "APARTADO H", 
-                    nombre: "PLAN DE AUTOPROTECCIÓN",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vQMfwpJXQCDjEzS_j4_DSMKEckOdmMvEiauKHein138SxdxEC8Zq-zeXVPMTBQmUz3Nso7H0Nhak2mL/pub"
-                },
-                { 
-                    codigo: "APARTADO I", 
-                    nombre: "NORMAS DE USO DE DISPOSITIVOS ELECTRÓNICOS",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vSRR9K4UKAR_SOPJ9QhqbVx7_ecNvoffn2vUYuJvIDY1cGijCnuK-u_hV2RhajBL1Hsfs7KMZiEu4Ip/pub"
-                },
-                { 
-                    codigo: "APARTADO K", 
-                    nombre: "ACTIVIDADES COMPLEMENTARIAS Y EXTRAESCOLARES",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vSuanIphM03Lb5BpRsYHyU_8pYtpSxsMCrCE-jqswYNdnASyzewRt0iIgHTUqq0e0DRFCdLlcmR6zfo/pub"
-                }
+                { codigo: "APARTADO 0", nombre: "ÓRGANOS COLEGIADOS DE GOBIERNO", enlace: "https://docs.google.com/document/d/e/2PACX-1vQaQGI-6D4QR9v0NyitcxOJHUEM42slOG4V-OFEncvkVxEE-P6XvI78gDB53gBahMv4uoZPkzDkKWWk/pub" },
+                { codigo: "APARTADO 1", nombre: "EL EQUIPO DIRECTIVO", enlace: "https://docs.google.com/document/d/e/2PACX-1vQDsiznmZI47OPrJgLSIq1w5NMqHx7wNld7OYCgFo1sBQ5Qy-d6_-FUZ-JYMfLOG7GLJrDgxHMBFlaB/pub" },
+                { codigo: "APARTADO A", nombre: "CAUCES DE PARTICIPACIÓN DE LA COMUNIDAD EDUCATIVA", enlace: "https://docs.google.com/document/d/e/2PACX-1vQoFJqKUSGIP1pr9JKCVCAxfUrV0o-EnkZ9ZmNIKllPoT7XXTNB6ieZk6EFjPwVAp2hAA-5bxG8dbpu/pub" },
+                { codigo: "APARTADO B", nombre: "CRITERIOS Y PROCEDIMIENTOS QUE GARANTIZEN EL RIGOR Y LA TRANSPARENCIA EN LA TOMA DE DECISIONES", enlace: "https://docs.google.com/document/d/e/2PACX-1vTYAuHZfDszFOZyrZpN-nFBA8a-wXZzoiftM2BDKBkZ1VCMbd9Nl1OdL0XchBcDudB0GGGcYgeKsmvS/pub" },
+                { codigo: "APARTADO C", nombre: "ORGANIZACIÓN DE ESPACIOS, INSTALACIONES Y RECURSOS MATERIALES", enlace: "https://docs.google.com/document/d/e/2PACX-1vSPAq2aqnGFqq5bk22Pgs0Cu9MUlfbRQP8S4t65VfLnFXaTyIHM7mZVtcDHNUUGkEUFn3xtIaeCT0k5/pub" },
+                { codigo: "APARTADO D", nombre: "ORGANIZACIÓN DEL CENTRO", enlace: "https://docs.google.com/document/d/e/2PACX-1vTms8e_GmWlhD26g-T7stm4bfE53XmSy6iZ8Cavu9OEKW_UrvFo9T8fWWY0HfWvYmj-FbZ8EJIBPz1V/pub" },
+                { codigo: "APARTADO E", nombre: "PROGRAMA DE GRATUIDAD DE LIBROS DE TEXTO", enlace: "https://docs.google.com/document/d/e/2PACX-1vTh1DK3kc0Kh2fbTKNZYUDYwLUSK8GHzhRvOgPOSeoDAQ-NwLIf7Y14chO7FS2_o9vHSCGfS-FZxH2w/pub" },
+                { codigo: "APARTADO G", nombre: "PROCEDIMIENTO PARA LA DESIGNACIÓN DE LOS MIEMBROS DEL EQUIPO DE EVALUACIÓN", enlace: "https://docs.google.com/document/d/e/2PACX-1vRDJ-g0Hby8ezDyTVCOWfsBKhJAYPtt_dIedhigtydPIfv__IjrcA2o6td3NgimIma8aWom4m2P1gaR/pub" },
+                { codigo: "APARTADO H", nombre: "PLAN DE AUTOPROTECCIÓN", enlace: "https://docs.google.com/document/d/e/2PACX-1vQMfwpJXQCDjEzS_j4_DSMKEckOdmMvEiauKHein138SxdxEC8Zq-zeXVPMTBQmUz3Nso7H0Nhak2mL/pub" },
+                { codigo: "APARTADO I", nombre: "NORMAS DE USO DE DISPOSITIVOS ELECTRÓNICOS", enlace: "https://docs.google.com/document/d/e/2PACX-1vSRR9K4UKAR_SOPJ9QhqbVx7_ecNvoffn2vUYuJvIDY1cGijCnuK-u_hV2RhajBL1Hsfs7KMZiEu4Ip/pub" },
+                { codigo: "APARTADO K", nombre: "ACTIVIDADES COMPLEMENTARIAS Y EXTRAESCOLARES", enlace: "https://docs.google.com/document/d/e/2PACX-1vSuanIphM03Lb5BpRsYHyU_8pYtpSxsMCrCE-jqswYNdnASyzewRt0iIgHTUqq0e0DRFCdLlcmR6zfo/pub" }
             ],
             "proyecto-gestion": [
-                { 
-                    codigo: "PROYECTO DE GESTIÓN", 
-                    nombre: "PROYECTO DE GESTIÓN",
-                    enlace: "https://docs.google.com/document/d/e/2PACX-1vTQ88RbdVuktV3J6BN2DbPeoUrTLkcWFsmZhnt3fZPwu6yb1pYjUzmQEIQXDiWqBXnDiGLQCTh-TsZM/pub"
-                }
+                { codigo: "PROYECTO DE GESTIÓN", nombre: "PROYECTO DE GESTIÓN", enlace: "https://docs.google.com/document/d/e/2PACX-1vTQ88RbdVuktV3J6BN2DbPeoUrTLkcWFsmZhnt3fZPwu6yb1pYjUzmQEIQXDiWqBXnDiGLQCTh-TsZM/pub" }
             ],
             "plan-actuacion-digital": [
-                { 
-                    codigo: "PLAN DE ACTUACIÓN DIGITAL", 
-                    nombre: "PLAN DE ACTUACIÓN DIGITAL",
-                    enlace: "https://drive.google.com/file/d/1Vdy4akjALInSe4wYPUq7m2W_5h4WCmWt/view?usp=sharing"
-                }
+                { codigo: "PLAN DE ACTUACIÓN DIGITAL", nombre: "PLAN DE ACTUACIÓN DIGITAL", enlace: "https://drive.google.com/file/d/1Vdy4akjALInSe4wYPUq7m2W_5h4WCmWt/view?usp=sharing" }
             ],
             "plan-mejora": [
-                { 
-                    codigo: "PLAN DE MEJORA", 
-                    nombre: "PLAN DE MEJORA",
-                    enlace: "https://drive.google.com/file/d/14hE14icagkunnRo7fugOAepEymjb6t3_/view?usp=sharing"
-                }
+                { codigo: "PLAN DE MEJORA", nombre: "PLAN DE MEJORA", enlace: "https://drive.google.com/file/d/14hE14icagkunnRo7fugOAepEymjb6t3_/view?usp=sharing" }
             ]
         };
 
-        // Función para generar los botones de apartados
-        function generarBotonesApartados() {
-            for (const seccion in apartados) {
-                const contenedor = document.querySelector(`#${seccion} .buttons-grid`);
-                contenedor.innerHTML = '';
+        // ============================================
+        // FUNCIONES DE FIREBASE
+        // ============================================
+
+        // Cargar datos desde Firebase
+        function loadFromFirebase() {
+            // Cargar año
+            database.ref('config/year').once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    currentYear = snapshot.val();
+                    updateYearDisplay();
+                }
+            });
+
+            // Cargar contenido
+            database.ref('config/content').once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    appContent = snapshot.val();
+                    updateContentDisplay();
+                }
+            });
+
+            // Cargar apartados
+            database.ref('apartados').once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    apartados = snapshot.val();
+                    generarBotonesApartados();
+                }
+            });
+
+            // IMPORTANTE: Inicializar usuario admin por defecto si no existe ningún usuario
+            initializeDefaultAdmin();
+        }
+
+        // Crear usuario admin por defecto si no existe ningún usuario en el sistema
+        async function initializeDefaultAdmin() {
+            try {
+                const usersSnapshot = await database.ref('users').once('value');
                 
-                apartados[seccion].forEach(apartado => {
-                    const boton = document.createElement('a');
-                    boton.className = 'apartado-btn';
-                    boton.href = apartado.enlace;
-                    boton.target = '_blank';
-                    boton.innerHTML = `
-                        <span class="apartado-code">${apartado.codigo}</span>
-                        <span class="apartado-name">${apartado.nombre}</span>
-                        <div class="tooltip">${apartado.nombre}</div>
-                    `;
-                    contenedor.appendChild(boton);
-                });
+                // Si no hay usuarios o la colección está vacía, crear admin por defecto
+                if (!usersSnapshot.exists() || usersSnapshot.numChildren() === 0) {
+                    console.log('🔧 Inicializando usuario admin por defecto...');
+                    
+                    await database.ref('users/admin').set({
+                        password: 'admin',
+                        email: 'admin@iesvdv.es',
+                        createdAt: Date.now(),
+                        role: 'admin'
+                    });
+                    
+                    console.log('✅ Usuario admin creado: admin / admin');
+                }
+            } catch (error) {
+                console.error('Error inicializando admin:', error);
             }
         }
 
-        // Función para cambiar entre secciones
+        // Guardar año en Firebase
+        function saveYearToFirebase() {
+            database.ref('config/year').set(currentYear);
+        }
+
+        // Guardar contenido en Firebase
+        function saveContentToFirebase() {
+            database.ref('config/content').set(appContent);
+        }
+
+        // Guardar apartados en Firebase
+        function saveApartadosToFirebase() {
+            database.ref('apartados').set(apartados);
+        }
+
+        // Verificar credenciales de usuario en Firebase
+        async function verifyCredentials(username, password) {
+            try {
+                const snapshot = await database.ref(`users/${username}`).once('value');
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    if (userData.password === password) {
+                        return { success: true, userData: userData };
+                    }
+                }
+                return { success: false };
+            } catch (error) {
+                console.error('Error verificando credenciales:', error);
+                return { success: false };
+            }
+        }
+
+        // Obtener lista de usuarios
+        async function loadUsers() {
+            try {
+                const snapshot = await database.ref('users').once('value');
+                const users = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(childSnapshot => {
+                        users.push({
+                            username: childSnapshot.key,
+                            ...childSnapshot.val()
+                        });
+                    });
+                }
+                return users;
+            } catch (error) {
+                console.error('Error cargando usuarios:', error);
+                return [];
+            }
+        }
+
+        // Añadir usuario
+        async function addUser(username, password, email = '') {
+            try {
+                await database.ref(`users/${username}`).set({
+                    password: password,
+                    email: email,
+                    createdAt: Date.now(),
+                    role: 'admin'
+                });
+                return { success: true };
+            } catch (error) {
+                console.error('Error añadiendo usuario:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Eliminar usuario
+        async function deleteUser(username) {
+            try {
+                await database.ref(`users/${username}`).remove();
+                return { success: true };
+            } catch (error) {
+                console.error('Error eliminando usuario:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Actualizar contraseña de usuario
+        async function updateUserPassword(username, newPassword) {
+            try {
+                await database.ref(`users/${username}/password`).set(newPassword);
+                return { success: true };
+            } catch (error) {
+                console.error('Error actualizando contraseña:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // ============================================
+        // FUNCIONES DE UI
+        // ============================================
+
+        // Actualizar visualización del año
+        function updateYearDisplay() {
+            const yearText = `Curso ${currentYear.start}-${currentYear.end}`;
+            document.getElementById('yearDisplay').textContent = yearText;
+            document.getElementById('yearPreviewText').textContent = yearText;
+            document.getElementById('footerText').textContent = appContent.footer.replace('{year}', currentYear.start);
+            
+            document.getElementById('yearStart').value = currentYear.start;
+            document.getElementById('yearEnd').value = currentYear.end;
+        }
+
+        // Actualizar visualización del contenido
+        function updateContentDisplay() {
+            document.getElementById('appTitle').textContent = appContent.title;
+            document.getElementById('footerText').textContent = appContent.footer.replace('{year}', currentYear.start);
+
+            // Actualizar títulos de secciones
+            for (let seccion in appContent.sections) {
+                const titleEl = document.getElementById(`title-${seccion}`);
+                if (titleEl && appContent.sections[seccion].title) {
+                    titleEl.textContent = appContent.sections[seccion].title;
+                }
+
+                // Actualizar tabs
+                const tabEl = document.getElementById(`tab-${seccion}`);
+                if (tabEl && appContent.sections[seccion].title) {
+                    tabEl.textContent = appContent.sections[seccion].title;
+                }
+            }
+        }
+
+        // Verificar sesión
+        function checkSession() {
+            const session = localStorage.getItem('planCentro_session');
+            if (session) {
+                try {
+                    const parsed = JSON.parse(session);
+                    if (parsed && parsed.accessMode) {
+                        currentUser = parsed;
+                        accessMode = parsed.accessMode;
+                        return true;
+                    }
+                } catch (e) {
+                    localStorage.removeItem('planCentro_session');
+                }
+            }
+            return false;
+        }
+
+        // Guardar sesión
+        function saveSession(mode, isAdmin = false, username = '') {
+            const sessionData = {
+                accessMode: mode,
+                role: isAdmin ? 'admin' : 'usuario',
+                displayName: isAdmin ? (username || 'Administrador') : 'Usuario',
+                username: username
+            };
+            currentUser = sessionData;
+            accessMode = mode;
+            localStorage.setItem('planCentro_session', JSON.stringify(sessionData));
+        }
+
+        // Cerrar sesión
+        function logout() {
+            currentUser = null;
+            accessMode = null;
+            localStorage.removeItem('planCentro_session');
+            showModeSelection();
+            hideUserPanel();
+            hideEditYearButton();
+            // IMPORTANTE: Desactivar modo edición completo
+            setupSectionTitleEditing(); // Quitar clase editable de títulos
+            generarBotonesApartados(); // Regenerar botones como usuario normal
+        }
+
+        // Mostrar/ocultar elementos según rol
+        function updateUIForRole() {
+            if (!currentUser) return;
+
+            showUserPanel();
+            
+            if (currentUser.role === 'admin') {
+                showEditYearButton();
+                document.getElementById('backupBtn').style.display = 'inline-flex';
+                setupSectionTitleEditing(); // Activar edición de títulos de sección
+            } else {
+                hideEditYearButton();
+                document.getElementById('backupBtn').style.display = 'none';
+                setupSectionTitleEditing(); // Desactivar edición de títulos de sección
+            }
+            
+            // SIEMPRE regenerar botones según el rol actual
+            generarBotonesApartados();
+        }
+
+        function showUserPanel() {
+            const panel = document.getElementById('userPanel');
+            panel.style.display = 'flex';
+            
+            document.getElementById('userName').textContent = currentUser.displayName;
+            document.getElementById('userRole').textContent = currentUser.role === 'admin' ? 'Admin' : 'Solo lectura';
+            document.getElementById('userAvatar').textContent = currentUser.displayName.charAt(0).toUpperCase();
+        }
+
+        function hideUserPanel() {
+            document.getElementById('userPanel').style.display = 'none';
+        }
+
+        function showEditYearButton() {
+            document.getElementById('editYearBtn').classList.add('visible');
+            document.getElementById('yearDisplay').classList.add('editable');
+        }
+
+        function hideEditYearButton() {
+            document.getElementById('editYearBtn').classList.remove('visible');
+            document.getElementById('yearDisplay').classList.remove('editable');
+        }
+
+        // Modales
+        function showModeSelection() {
+            document.getElementById('modeOverlay').classList.remove('hidden');
+            document.getElementById('loginOverlay').classList.add('hidden');
+        }
+
+        function hideModeSelection() {
+            document.getElementById('modeOverlay').classList.add('hidden');
+        }
+
+        function showLoginModal() {
+            document.getElementById('modeOverlay').classList.add('hidden');
+            document.getElementById('loginOverlay').classList.remove('hidden');
+            document.getElementById('username').focus();
+        }
+
+        function hideLoginModal() {
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('loginError').classList.remove('visible');
+            document.getElementById('loginForm').reset();
+        }
+
+        function showYearModal() {
+            document.getElementById('yearModalOverlay').classList.remove('hidden');
+            document.getElementById('yearStart').focus();
+        }
+
+        function hideYearModal() {
+            document.getElementById('yearModalOverlay').classList.add('hidden');
+            updateYearDisplay();
+        }
+
+
+
+        function showLoginError(message) {
+            const errorEl = document.getElementById('loginError');
+            errorEl.textContent = message || 'Usuario o contraseña incorrectos';
+            errorEl.classList.add('visible');
+        }
+
+        // Generar botones de apartados
+        function generarBotonesApartados() {
+            for (const seccion in apartados) {
+                const contenedor = document.getElementById(`grid-${seccion}`);
+                if (!contenedor) continue;
+                
+                contenedor.innerHTML = '';
+                
+                // Ordenar etiquetas alfabéticamente por código antes de mostrar
+                const sortedApartados = [...apartados[seccion]].sort((a, b) => {
+                    return a.codigo.localeCompare(b.codigo, 'es', { sensitivity: 'base' });
+                });
+
+                sortedApartados.forEach((apartado, index) => {
+                    // Encontrar el índice original en el array para operaciones CRUD
+                    const originalIndex = apartados[seccion].findIndex(e => 
+                        e.codigo === apartado.codigo && e.nombre === apartado.nombre
+                    );
+                    
+                    const boton = document.createElement('div');
+                    
+                    if (currentUser && currentUser.role === 'admin') {
+                        // Modo admin: el botón abre el modal de edición
+                        boton.className = 'apartado-btn admin-editable';
+                        boton.innerHTML = `
+                            <span class="edit-badge visible">EDITAR</span>
+                            <span class="apartado-code">${apartado.codigo}</span>
+                            <span class="apartado-name">${apartado.nombre}</span>
+                            <div class="tooltip">Click para editar | ${apartado.nombre}</div>
+                            <button type="button" class="delete-etiqueta-btn visible" onclick="event.stopPropagation(); deleteEtiqueta('${seccion}', ${originalIndex});" title="Eliminar etiqueta">×</button>
+                        `;
+                        boton.onclick = (e) => {
+                            if (e.target.classList.contains('delete-etiqueta-btn')) return;
+                            openEditEtiqueta(seccion, originalIndex);
+                        };
+                    } else {
+                        // Modo usuario: el botón navega al enlace
+                        boton.className = 'apartado-btn';
+                        const enlace = document.createElement('a');
+                        enlace.href = apartado.enlace;
+                        enlace.target = '_blank';
+                        enlace.className = 'apartado-btn';
+                        enlace.innerHTML = `
+                            <span class="apartado-code">${apartado.codigo}</span>
+                            <span class="apartado-name">${apartado.nombre}</span>
+                            <div class="tooltip">${apartado.nombre}</div>
+                        `;
+                        contenedor.appendChild(enlace);
+                        return; // Saltar el append de boton
+                    }
+                    contenedor.appendChild(boton);
+                });
+
+                // Botón de añadir etiqueta (solo admin)
+                if (currentUser && currentUser.role === 'admin') {
+                    const addBtn = document.createElement('button');
+                    addBtn.type = 'button';
+                    addBtn.className = 'apartado-btn add-etiqueta-btn visible';
+                    addBtn.innerHTML = '+';
+                    addBtn.title = 'Añadir nueva etiqueta';
+                    addBtn.onclick = () => openAddEtiquetaForSection(seccion);
+                    contenedor.appendChild(addBtn);
+                }
+            }
+        }
+
+        // Generar botones de apartados
+
+        // Abrir modal de edición de etiqueta
+        function openEditEtiqueta(seccion, index) {
+            const etiqueta = apartados[seccion][index];
+            document.getElementById('editEtiquetaIndex').value = index;
+            document.getElementById('editEtiquetaSeccion').value = seccion;
+            document.getElementById('editEtiquetaCodigo').value = etiqueta.codigo;
+            document.getElementById('editEtiquetaNombre').value = etiqueta.nombre;
+            document.getElementById('editEtiquetaEnlace').value = etiqueta.enlace || '';
+            updateEditPreview();
+            document.getElementById('etiquetaEditOverlay').classList.remove('hidden');
+            document.getElementById('editEtiquetaCodigo').focus();
+        }
+
+        // Actualizar vista previa en tiempo real
+        function updateEditPreview() {
+            const codigo = document.getElementById('editEtiquetaCodigo').value || 'CÓDIGO';
+            const nombre = document.getElementById('editEtiquetaNombre').value || 'Nombre de la etiqueta';
+            const enlace = document.getElementById('editEtiquetaEnlace').value || '#';
+            
+            document.getElementById('editPreview').innerHTML = `
+                <div style="font-weight: 700; color: var(--primary-color); font-size: 1.1rem; margin-bottom: 0.3rem;">${codigo}</div>
+                <div style="color: #333;">${nombre}</div>
+                <div style="font-size: 0.8rem; color: #888; margin-top: 0.3rem; word-break: break-all;">${enlace}</div>
+            `;
+        }
+
+        // ============================================
+        // AÑADIR NUEVA ETIQUETA
+        // ============================================
+
+        // Abrir modal para añadir etiqueta a sección específica
+        function openAddEtiquetaForSection(seccion) {
+            if (!currentUser || currentUser.role !== 'admin') return;
+            
+            document.getElementById('addEtiquetaSeccion').value = seccion;
+            document.getElementById('addEtiquetaCodigo').value = '';
+            document.getElementById('addEtiquetaNombre').value = '';
+            document.getElementById('addEtiquetaEnlace').value = '#';
+            
+            updateAddPreview();
+            document.getElementById('addEtiquetaOverlay').classList.remove('hidden');
+            document.getElementById('addEtiquetaCodigo').focus();
+        }
+
+        // Cerrar modal de añadir etiqueta
+        function closeAddEtiqueta() {
+            document.getElementById('addEtiquetaOverlay').classList.add('hidden');
+            document.getElementById('addEtiquetaForm').reset();
+        }
+
+        // Actualizar vista previa del formulario de añadir
+        function updateAddPreview() {
+            const codigo = document.getElementById('addEtiquetaCodigo').value || 'CÓDIGO';
+            const nombre = document.getElementById('addEtiquetaNombre').value || 'Nombre de la etiqueta';
+            const enlace = document.getElementById('addEtiquetaEnlace').value || '#';
+            
+            document.getElementById('addPreview').innerHTML = `
+                <div style="font-weight: 700; color: var(--success-color); font-size: 1.1rem; margin-bottom: 0.3rem;">${codigo}</div>
+                <div style="color: #333;">${nombre}</div>
+                <div style="font-size: 0.8rem; color: #888; margin-top: 0.3rem; word-break: break-all;">${enlace}</div>
+            `;
+        }
+
+        // Guardar nueva etiqueta
+        function saveNewEtiqueta(e) {
+            e.preventDefault();
+            
+            const seccion = document.getElementById('addEtiquetaSeccion').value;
+            const codigo = document.getElementById('addEtiquetaCodigo').value.trim();
+            const nombre = document.getElementById('addEtiquetaNombre').value.trim();
+            const enlace = document.getElementById('addEtiquetaEnlace').value.trim() || '#';
+            
+            if (!codigo || !nombre) {
+                showNotification('⚠️ El código y el nombre son obligatorios', 'error');
+                return;
+            }
+            
+            if (!apartados[seccion]) {
+                apartados[seccion] = [];
+            }
+            
+            apartados[seccion].push({ codigo, nombre, enlace });
+            saveApartadosToFirebase();
+            generarBotonesApartados();
+            closeAddEtiqueta();
+            showNotification(`✅ Etiqueta "${codigo}" añadida correctamente`, 'success');
+        }
+
+        // ============================================
+        // SISTEMA DE COPIAS DE SEGURIDAD (BACKUP/RESTORE)
+        // ============================================
+
+        // Abrir modal de copias de seguridad
+        function openBackupModal() {
+            if (!currentUser || currentUser.role !== 'admin') return;
+            
+            document.getElementById('backupOverlay').classList.remove('hidden');
+            loadBackupsList();
+        }
+
+        // Cerrar modal de copias de seguridad
+        function closeBackupModal() {
+            document.getElementById('backupOverlay').classList.add('hidden');
+            hideBackupStatus();
+        }
+
+        // Mostrar estado de la operación
+        function showBackupStatus(message, type = 'info') {
+            const statusEl = document.getElementById('backupStatus');
+            statusEl.style.display = 'block';
+            statusEl.textContent = message;
+            statusEl.style.backgroundColor = type === 'success' ? '#d4edda' : 
+                                              type === 'error' ? '#f8d7da' : 
+                                              type === 'warning' ? '#fff3cd' : '#e7f3ff';
+            statusEl.style.color = type === 'success' ? '#155724' : 
+                                   type === 'error' ? '#721c24' : 
+                                   type === 'warning' ? '#856404' : '#084298';
+        }
+
+        function hideBackupStatus() {
+            document.getElementById('backupStatus').style.display = 'none';
+        }
+
+        // Crear copia de seguridad completa
+        async function createBackup() {
+            try {
+                showBackupStatus('⏳ Creando copia de seguridad...', 'info');
+                
+                // Recopilar todos los datos actuales
+                const backupData = {
+                    timestamp: Date.now(),
+                    date: new Date().toLocaleString('es-ES'),
+                    createdBy: currentUser?.username || 'admin',
+                    data: {
+                        year: currentYear,
+                        content: appContent,
+                        apartados: apartados
+                    },
+                    stats: {
+                        totalEtiquetas: Object.values(apartados).reduce((sum, arr) => sum + arr.length, 0),
+                        secciones: Object.keys(apartados).length,
+                        yearText: `Curso ${currentYear.start}-${currentYear.end}`
+                    }
+                };
+
+                // Generar ID único para el backup
+                const backupId = `backup_${Date.now()}`;
+                
+                // Guardar en Firebase
+                await database.ref(`backups/${backupId}`).set(backupData);
+                
+                showBackupStatus('✅ Copia de seguridad creada correctamente', 'success');
+                showNotification('📦 Copia de seguridad creada con éxito', 'success');
+                
+                // Actualizar lista después de 1 segundo
+                setTimeout(() => {
+                    loadBackupsList();
+                    hideBackupStatus();
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Error creando backup:', error);
+                showBackupStatus('❌ Error al crear copia de seguridad', 'error');
+                showNotification('Error al crear copia de seguridad', 'error');
+            }
+        }
+
+        // Cargar lista de copias de seguridad
+        async function loadBackupsList() {
+            try {
+                const listEl = document.getElementById('backupsList');
+                listEl.innerHTML = '<p style="color: #666; text-align: center; padding: 2rem;">Cargando...</p>';
+                
+                const snapshot = await database.ref('backups').orderByChild('timestamp').limitToLast(20).once('value');
+                
+                if (!snapshot.exists()) {
+                    listEl.innerHTML = `
+                        <div style="text-align: center; padding: 3rem; color: #888;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
+                            <p>No hay copias de seguridad almacenadas</p>
+                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Haz clic en "Crear Copia" para hacer tu primera backup</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const backups = [];
+                snapshot.forEach(childSnapshot => {
+                    backups.push({
+                        id: childSnapshot.key,
+                        ...childSnapshot.val()
+                    });
+                });
+
+                // Ordenar del más reciente al más antiguo
+                backups.reverse();
+
+                let html = '';
+                backups.forEach((backup, index) => {
+                    const date = new Date(backup.timestamp);
+                    const formattedDate = date.toLocaleDateString('es-ES', { 
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    });
+                    
+                    html += `
+                        <div class="user-item" style="margin-bottom: 1rem; border-left-color: var(--secondary-color);">
+                            <div class="user-info-admin">
+                                <div class="user-avatar-admin" style="background-color: var(--secondary-color);">📦</div>
+                                <div class="user-details">
+                                    <h4>${formattedDate}</h4>
+                                    <span>Creado por: <strong>${backup.createdBy}</strong></span><br>
+                                    <small style="color: #666;">
+                                        📊 ${backup.stats.totalEtiquetas} etiquetas en ${backup.stats.secciones} secciones | 
+                                        ${backup.stats.yearText}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="user-actions">
+                                <button type="button" class="btn-edit-user" onclick="restoreBackup('${backup.id}', '${backup.date}')" title="Restaurar esta copia">
+                                    ↩️ Restaurar
+                                </button>
+                                <button type="button" class="btn-delete-user" onclick="deleteBackup('${backup.id}')" title="Eliminar esta copia">
+                                    🗑️ Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                listEl.innerHTML = html || '<p style="color: #666; text-align: center; padding: 2rem;">No hay copias disponibles</p>';
+                
+            } catch (error) {
+                console.error('Error cargando backups:', error);
+                document.getElementById('backupsList').innerHTML = `
+                    <p style="color: var(--accent-color); text-align: center; padding: 2rem;">
+                        ❌ Error al cargar las copias de seguridad
+                    </p>
+                `;
+            }
+        }
+
+        // Confirmar restauración de copia de seguridad
+        function restoreBackup(backupId, backupDate) {
+            const confirmMsg = `¿Estás seguro de que quieres restaurar la copia de seguridad del ${backupDate}?\n\n⚠️ Esto reemplazará TODOS los datos actuales.`;
+            
+            if (confirm(confirmMsg)) {
+                executeRestore(backupId);
+            }
+        }
+
+        // Ejecutar restauración
+        async function executeRestore(backupId) {
+            try {
+                showBackupStatus('⏳ Restaurando copia de seguridad...', 'warning');
+                
+                const snapshot = await database.ref(`backups/${backupId}`).once('value');
+                
+                if (!snapshot.exists()) {
+                    showBackupStatus('❌ No se encontró la copia de seguridad', 'error');
+                    return;
+                }
+
+                const backupData = snapshot.val();
+                const { year, content, apartados: backupApartados } = backupData.data;
+
+                // Restaurar datos en memoria
+                currentYear = year;
+                appContent = content;
+                apartados = backupApartados;
+
+                // Guardar en Firebase
+                await Promise.all([
+                    database.ref('config/year').set(year),
+                    database.ref('config/content').set(content),
+                    database.ref('apartados').set(backupApartados)
+                ]);
+
+                // Actualizar interfaz
+                updateYearDisplay();
+                updateContentDisplay();
+                generarBotonesApartados();
+                setupSectionTitleEditing();
+
+                showBackupStatus('✅ Copia de seguridad restaurada correctamente', 'success');
+                showNotification('✅ Sistema restaurado al punto de backup', 'success');
+
+                setTimeout(() => {
+                    hideBackupStatus();
+                    closeBackupModal();
+                }, 2000);
+
+            } catch (error) {
+                console.error('Error restaurando backup:', error);
+                showBackupStatus('❌ Error al restaurar copia de seguridad', 'error');
+                showNotification('Error al restaurar copia de seguridad', 'error');
+            }
+        }
+
+        // Eliminar copia de seguridad
+        async function deleteBackup(backupId) {
+            if (confirm('¿Estás seguro de que quieres eliminar esta copia de seguridad?\n\nEsta acción no se puede deshacer.')) {
+                try {
+                    await database.ref(`backups/${backupId}`).remove();
+                    showNotification('🗑️ Copia de seguridad eliminada', 'info');
+                    loadBackupsList();
+                } catch (error) {
+                    console.error('Error eliminando backup:', error);
+                    showNotification('Error al eliminar copia de seguridad', 'error');
+                }
+            }
+        }
+
+        // Sistema de notificaciones
+        function showNotification(message, type = 'info') {
+            // Eliminar notificación existente si la hay
+            const existing = document.querySelector('.notification-toast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'notification-toast';
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                border-radius: 10px;
+                color: white;
+                font-weight: 600;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+                z-index: 10001;
+                animation: slideInRight 0.3s ease;
+                ${type === 'success' ? 'background-color: var(--success-color);' : ''}
+                ${type === 'error' ? 'background-color: var(--accent-color);' : ''}
+                ${type === 'info' ? 'background-color: var(--secondary-color);' : ''}
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Añadir estilos de animación para notificaciones
+        const notificationStyles = document.createElement('style');
+        notificationStyles.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(notificationStyles);
+
+        // Cerrar modal de edición de etiqueta
+        function closeEditEtiqueta() {
+            document.getElementById('etiquetaEditOverlay').classList.add('hidden');
+        }
+
+        // Guardar cambios de etiqueta
+        function saveEtiquetaChanges(e) {
+            e.preventDefault();
+            const seccion = document.getElementById('editEtiquetaSeccion').value;
+            const index = parseInt(document.getElementById('editEtiquetaIndex').value);
+            
+            const newCodigo = document.getElementById('editEtiquetaCodigo').value.trim();
+            const newNombre = document.getElementById('editEtiquetaNombre').value.trim();
+            const newEnlace = document.getElementById('editEtiquetaEnlace').value.trim() || '#';
+            
+            if (!newCodigo || !newNombre) {
+                showNotification('⚠️ El código y el nombre son obligatorios', 'error');
+                return;
+            }
+            
+            apartados[seccion][index] = {
+                codigo: newCodigo,
+                nombre: newNombre,
+                enlace: newEnlace
+            };
+            
+            saveApartadosToFirebase();
+            generarBotonesApartados();
+            closeEditEtiqueta();
+            showNotification('✓ Etiqueta actualizada correctamente', 'success');
+        }
+
+        // Eliminar etiqueta
+        // Variables para confirmación de eliminación
+        let pendingDeleteAction = null;
+
+        // Mostrar modal de confirmación de eliminación
+        function showDeleteConfirm(seccion, index) {
+            const etiqueta = apartados[seccion][index];
+            document.getElementById('confirmEtiquetaDetails').innerHTML = `
+                <strong>Código:</strong> ${etiqueta.codigo}<br>
+                <strong>Nombre:</strong> ${etiqueta.nombre}
+            `;
+            document.getElementById('confirmOverlay').classList.remove('hidden');
+            pendingDeleteAction = { seccion, index };
+        }
+
+        // Ocultar modal de confirmación
+        function hideDeleteConfirm() {
+            document.getElementById('confirmOverlay').classList.add('hidden');
+            pendingDeleteAction = null;
+        }
+
+        // Ejecutar eliminación confirmada
+        function executeDelete() {
+            if (!pendingDeleteAction) return;
+            
+            const { seccion, index } = pendingDeleteAction;
+            apartados[seccion].splice(index, 1);
+            saveApartadosToFirebase();
+            generarBotonesApartados();
+            hideDeleteConfirm();
+            showNotification('✓ Etiqueta eliminada correctamente', 'success');
+        }
+
+        // Eliminar etiqueta (llama al modal de confirmación)
+        function deleteEtiqueta(seccion, index) {
+            showDeleteConfirm(seccion, index);
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+
+        // Acceso directo
+        document.getElementById('directAccessBtn').addEventListener('click', function() {
+            saveSession('direct', false);
+            hideModeSelection();
+            updateUIForRole();
+        });
+
+        // Acceso edición
+        document.getElementById('editAccessBtn').addEventListener('click', function() {
+            showLoginModal();
+        });
+
+        // Volver a selección
+        document.getElementById('backToModeBtn').addEventListener('click', function() {
+            hideLoginModal();
+            showModeSelection();
+        });
+
+        // Login form
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+            
+            const result = await verifyCredentials(username, password);
+            
+            if (result.success) {
+                hideLoginModal();
+                saveSession('edit', true, username);
+                updateUIForRole();
+            } else {
+                showLoginError('Usuario o contraseña incorrectos');
+            }
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        // Copias de seguridad (solo admin)
+        document.getElementById('backupBtn').addEventListener('click', openBackupModal);
+        document.getElementById('createBackupBtn').addEventListener('click', createBackup);
+        document.getElementById('refreshBackupsBtn').addEventListener('click', loadBackupsList);
+
+        // Editar año
+        document.getElementById('editYearBtn').addEventListener('click', showYearModal);
+        document.getElementById('yearDisplay').addEventListener('click', function() {
+            if (currentUser && currentUser.role === 'admin') {
+                showYearModal();
+            }
+        });
+
+        // Cerrar modal año
+        document.getElementById('closeYearModal').addEventListener('click', hideYearModal);
+        document.getElementById('cancelYearBtn').addEventListener('click', hideYearModal);
+
+        // Input año
+        document.getElementById('yearStart').addEventListener('input', function(e) {
+            const startYear = parseInt(e.target.value) || 2025;
+            document.getElementById('yearEnd').value = startYear + 1;
+            document.getElementById('yearPreviewText').textContent = `Curso ${startYear}-${startYear + 1}`;
+        });
+
+        // Guardar año
+        document.getElementById('yearForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const startYear = parseInt(document.getElementById('yearStart').value);
+            
+            if (startYear >= 2000 && startYear <= 2099) {
+                currentYear.start = startYear;
+                currentYear.end = startYear + 1;
+                saveYearToFirebase();
+                updateYearDisplay();
+                hideYearModal();
+                alert('✓ Año escolar actualizado correctamente');
+            } else {
+                alert('Por favor, introduce un año válido (entre 2000 y 2099)');
+            }
+        });
+
+        // Editar etiqueta
+        document.getElementById('editEtiquetaForm').addEventListener('submit', saveEtiquetaChanges);
+        document.getElementById('cancelEditEtiqueta').addEventListener('click', closeEditEtiqueta);
+
+        // Event listeners para vista previa en tiempo real (editar)
+        document.getElementById('editEtiquetaCodigo').addEventListener('input', updateEditPreview);
+        document.getElementById('editEtiquetaNombre').addEventListener('input', updateEditPreview);
+        document.getElementById('editEtiquetaEnlace').addEventListener('input', updateEditPreview);
+
+        // Añadir nueva etiqueta
+        document.getElementById('addEtiquetaForm').addEventListener('submit', saveNewEtiqueta);
+        document.getElementById('cancelAddEtiqueta').addEventListener('click', closeAddEtiqueta);
+
+        // Event listeners para vista previa en tiempo real (añadir)
+        document.getElementById('addEtiquetaCodigo').addEventListener('input', updateAddPreview);
+        document.getElementById('addEtiquetaNombre').addEventListener('input', updateAddPreview);
+        document.getElementById('addEtiquetaEnlace').addEventListener('input', updateAddPreview);
+
+        // Event listeners para modal de confirmación
+        document.getElementById('btnConfirmDelete').addEventListener('click', executeDelete);
+        document.getElementById('btnCancelConfirm').addEventListener('click', hideDeleteConfirm);
+        document.getElementById('confirmOverlay').addEventListener('click', function(e) {
+            if (e.target === this) hideDeleteConfirm();
+        });
+
+        // Event listeners para modal de edición de título de sección
+        document.getElementById('editSectionTitleForm').addEventListener('submit', saveSectionTitleChanges);
+        document.getElementById('cancelEditSectionTitle').addEventListener('click', closeEditSectionTitle);
+        document.getElementById('sectionTitleEditOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeEditSectionTitle();
+        });
+
+        // Click en overlays para cerrar
+        document.getElementById('yearModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) hideYearModal();
+        });
+
+        document.getElementById('etiquetaEditOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeEditEtiqueta();
+        });
+
+        document.getElementById('addEtiquetaOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeAddEtiqueta();
+        });
+
+        document.getElementById('backupOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeBackupModal();
+        });
+
+        // Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (!document.getElementById('confirmOverlay').classList.contains('hidden')) {
+                    hideDeleteConfirm();
+                } else if (!document.getElementById('etiquetaEditOverlay').classList.contains('hidden')) {
+                    closeEditEtiqueta();
+                } else if (!document.getElementById('addEtiquetaOverlay').classList.contains('hidden')) {
+                    closeAddEtiqueta();
+                } else if (!document.getElementById('backupOverlay').classList.contains('hidden')) {
+                    closeBackupModal();
+                } else if (!document.getElementById('sectionTitleEditOverlay').classList.contains('hidden')) {
+                    closeEditSectionTitle();
+                } else if (!document.getElementById('yearModalOverlay').classList.contains('hidden')) {
+                    hideYearModal();
+                } else if (!document.getElementById('loginOverlay').classList.contains('hidden')) {
+                    showModeSelection();
+                }
+            }
+        });
+
+        // Click en título principal - editable por admin (modal de edición de título)
+        document.getElementById('appTitle').addEventListener('click', function() {
+            if (currentUser && currentUser.role === 'admin') {
+                // El título principal se puede editar con un prompt simple por ahora
+                const nuevoTitulo = prompt('Editar título de la aplicación:', appContent.title);
+                if (nuevoTitulo && nuevoTitulo.trim()) {
+                    appContent.title = nuevoTitulo.trim();
+                    document.getElementById('appTitle').textContent = appContent.title;
+                    saveContentToFirebase();
+                    showNotification('✓ Título actualizado correctamente', 'success');
+                }
+            }
+        });
+
+        // ============================================
+        // EDICIÓN DE TÍTULOS DE SECCIÓN
+        // ============================================
+
+        // Abrir modal de edición de título de sección
+        function openEditSectionTitle(seccionId) {
+            if (!currentUser || currentUser.role !== 'admin') return;
+            
+            const currentTitle = appContent.sections[seccionId]?.title || '';
+            document.getElementById('editSectionId').value = seccionId;
+            document.getElementById('editSectionTitleInput').value = currentTitle;
+            document.getElementById('sectionTitleEditOverlay').classList.remove('hidden');
+            document.getElementById('editSectionTitleInput').focus();
+            document.getElementById('editSectionTitleInput').select();
+        }
+
+        // Cerrar modal de edición de título
+        function closeEditSectionTitle() {
+            document.getElementById('sectionTitleEditOverlay').classList.add('hidden');
+        }
+
+        // Guardar cambios del título de sección
+        function saveSectionTitleChanges(e) {
+            e.preventDefault();
+            const seccionId = document.getElementById('editSectionId').value;
+            const newTitle = document.getElementById('editSectionTitleInput').value.trim();
+            
+            if (!newTitle) {
+                showNotification('⚠️ El título no puede estar vacío', 'error');
+                return;
+            }
+            
+            if (appContent.sections[seccionId]) {
+                appContent.sections[seccionId].title = newTitle;
+                
+                // Actualizar el título en la sección
+                const titleElement = document.getElementById(`title-${seccionId}`);
+                if (titleElement) {
+                    titleElement.textContent = newTitle;
+                }
+                
+                // Actualizar el texto de la pestaña
+                const tabElement = document.getElementById(`tab-${seccionId}`);
+                if (tabElement) {
+                    tabElement.textContent = newTitle;
+                }
+                
+                saveContentToFirebase();
+                closeEditSectionTitle();
+                showNotification('✓ Título de sección actualizado correctamente', 'success');
+            }
+        }
+
+        // Configurar click en títulos de sección para admin
+        function setupSectionTitleEditing() {
+            const isAdmin = currentUser && currentUser.role === 'admin';
+            document.querySelectorAll('.section-title').forEach(titleEl => {
+                if (isAdmin) {
+                    titleEl.classList.add('editable');
+                    // Añadir event listener solo si no lo tiene ya
+                    if (!titleEl.dataset.editSetup) {
+                        titleEl.addEventListener('click', function() {
+                            const seccionId = this.id.replace('title-', '');
+                            openEditSectionTitle(seccionId);
+                        });
+                        titleEl.dataset.editSetup = 'true';
+                    }
+                } else {
+                    titleEl.classList.remove('editable');
+                }
+            });
+        }
+
+        // Navegación entre secciones
         function cambiarSeccion(seccionId) {
-            // Ocultar todas las secciones
             document.querySelectorAll('.section').forEach(seccion => {
                 seccion.classList.remove('active');
             });
-            
-            // Mostrar la sección seleccionada
             document.getElementById(seccionId).classList.add('active');
             
-            // Actualizar botones activos
             document.querySelectorAll('.tab-btn').forEach(boton => {
                 boton.classList.remove('active');
             });
-            
             document.querySelector(`[data-target="${seccionId}"]`).classList.add('active');
         }
 
-        // Inicializar la aplicación
+        // ============================================
+        // INICIALIZACIÓN
+        // ============================================
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Generar botones de apartados
-            generarBotonesApartados();
-            
-            // Configurar eventos para los botones de navegación
+            // Configurar navegación
             document.querySelectorAll('.tab-btn').forEach(boton => {
                 boton.addEventListener('click', function() {
-                    const seccionId = this.getAttribute('data-target');
-                    cambiarSeccion(seccionId);
+                    cambiarSeccion(this.getAttribute('data-target'));
                 });
             });
+
+            // Cargar datos de Firebase
+            loadFromFirebase();
+
+            // Verificar sesión existente
+            if (checkSession()) {
+                hideModeSelection();
+                hideLoginModal();
+                updateUIForRole();
+            } else {
+                showModeSelection();
+            }
+
+            // Generar botones iniciales
+            generarBotonesApartados();
         });
     </script>
-		<script>
-	  // Registrar Service Worker
-	  if ('serviceWorker' in navigator) {
-		window.addEventListener('load', () => {
-		  navigator.serviceWorker.register('/PlanDeCentro/sw.js')
-			.then(registration => {
-			  console.log('Service Worker registrado con éxito:', registration);
-			})
-			.catch(error => {
-			  console.log('Error al registrar el Service Worker:', error);
-			});
-		});
-	  }
+                <script>
+          // Registrar Service Worker
+          if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                  navigator.serviceWorker.register('/PlanDeCentro/sw.js')
+                        .then(registration => {
+                          console.log('Service Worker registrado con éxito:', registration);
+                        })
+                        .catch(error => {
+                          console.log('Error al registrar el Service Worker:', error);
+                        });
+                });
+          }
 
-	  // Detectar cambios y actualizar
-	  let newWorker;
-	  function showUpdateBar() {
-		// Aquí puedes mostrar una notificación al usuario
-		// informando que hay una nueva versión disponible
-		if (confirm('Hay una nueva versión disponible. ¿Deseas actualizar?')) {
-		  newWorker.postMessage({ action: 'skipWaiting' });
-		}
-	  }
+          // Detectar cambios y actualizar
+          let newWorker;
+          function showUpdateBar() {
+                if (confirm('Hay una nueva versión disponible. ¿Deseas actualizar?')) {
+                  newWorker.postMessage({ action: 'skipWaiting' });
+                }
+          }
 
-	  // Escuchar el evento de actualización
-	  navigator.serviceWorker.addEventListener('controllerchange', () => {
-		window.location.reload();
-	  });
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+                window.location.reload();
+          });
 
-	  if ('serviceWorker' in navigator) {
-		navigator.serviceWorker.addEventListener('message', event => {
-		  if (event.data && event.data.type === 'NEW_VERSION_FOUND') {
-			newWorker = event.data.worker;
-			showUpdateBar();
-		  }
-		});
-	  }
-	</script>
+          if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.addEventListener('message', event => {
+                  if (event.data && event.data.type === 'NEW_VERSION_FOUND') {
+                        newWorker = event.data.worker;
+                        showUpdateBar();
+                  }
+                });
+          }
+        </script>
 </body>
 </html>
