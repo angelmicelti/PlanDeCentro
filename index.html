@@ -2,23 +2,30 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- Favicon -->
-        <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
 
-        <!-- Manifest para PWA -->
-        <link rel="manifest" href="manifest.json">
+    <!-- Manifest para PWA -->
+    <link rel="manifest" href="manifest.json">
 
-        <!-- iOS support -->
-        <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-        <meta name="apple-mobile-web-app-status-bar" content="#1a4b8c">
-        <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- iOS support -->
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
 
-        <!-- Theme color -->
-        <meta name="theme-color" content="#1a4b8c">
+    <!-- Theme color -->
+    <meta name="theme-color" content="#1a4b8c">
+    <meta name="msapplication-TileColor" content="#1a4b8c">
+    <meta name="msapplication-nav-button-color" content="#1a4b8c">
 
-        <!-- Viewport para iOS -->
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- Preconnect para rendimiento -->
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+
+    <!-- Soporte para modo oscuro preferido del sistema (respetado opcionalmente) -->
+    <meta name="color-scheme" content="light only">
         
     <title>Plan de Centro - IES Virgen de Villadiego</title>
     
@@ -35,47 +42,116 @@
             --dark-color: #343a40;
             --success-color: #28a745;
             --warning-color: #ffc107;
+            
+            /* Variables responsivas */
+            --base-font-size: clamp(14px, 2vw, 18px);
+            --header-font-size: clamp(1.5rem, 4vw, 2rem);
+            --section-title-size: clamp(1.3rem, 3vw, 1.8rem);
+            --modal-padding: clamp(1rem, 3vw, 2rem);
+            --container-max-width: min(1200px, 95%);
+            --touch-target-min: 44px;
+            --border-radius-sm: 8px;
+            --border-radius-md: 12px;
+            --border-radius-lg: 16px;
+            --border-radius-xl: 20px;
+            
+            /* Transiciones globales */
+            --transition-fast: 0.2s ease;
+            --transition-normal: 0.3s ease;
+            --transition-slow: 0.5s ease;
+            
+            /* Sombras */
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.2);
+            --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
         
-        * {
+        /* Reset moderno y base */
+        *,
+        *::before,
+        *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        html {
+            font-size: var(--base-font-size);
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
             background-color: #f5f5f5;
             color: var(--dark-color);
             line-height: 1.6;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Focus visible para accesibilidad */
+        :focus-visible {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+        
+        :focus:not(:focus-visible) {
+            outline: none;
+        }
+        
+        /* Selección de texto */
+        ::selection {
+            background-color: var(--primary-color);
+            color: white;
         }
         
         header {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
-            padding: 1.5rem;
+            padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 5vw, 2rem);
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-md);
             position: relative;
+            min-height: auto;
+            flex-shrink: 0;
         }
         
         .header-content {
-            max-width: 1200px;
+            max-width: var(--container-max-width);
             margin: 0 auto;
+            position: relative;
+            padding-right: calc(var(--touch-target-min) * 3); /* Espacio para panel usuario */
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                padding-right: 1rem;
+                padding-bottom: 4rem; /* Espacio para panel usuario posicionado abajo */
+            }
         }
         
         header h1 {
-            font-size: 1.8rem;
+            font-size: var(--header-font-size);
             margin-bottom: 0.5rem;
             cursor: pointer;
+            word-wrap: break-word;
+            hyphens: auto;
         }
 
         header h1:hover {
             opacity: 0.9;
+            transform: scale(1.02);
         }
         
         header p {
-            font-size: 1rem;
+            font-size: clamp(0.85rem, 2vw, 1.1rem);
             opacity: 0.9;
         }
 
@@ -130,8 +206,23 @@
             right: 1.5rem;
             display: flex;
             align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
+            gap: clamp(0.5rem, 1.5vw, 1rem);
+            flex-wrap: nowrap;
+            z-index: 100;
+        }
+
+        @media (max-width: 768px) {
+            .user-panel {
+                position: absolute;
+                bottom: 0.5rem;
+                right: 50%;
+                transform: translateX(50%);
+                top: auto;
+                flex-wrap: wrap;
+                justify-content: center;
+                width: calc(100% - 2rem);
+                max-width: 400px;
+            }
         }
 
         .user-info {
@@ -139,48 +230,66 @@
             align-items: center;
             gap: 0.5rem;
             background-color: rgba(255, 255, 255, 0.15);
-            padding: 0.5rem 1rem;
+            padding: clamp(0.4rem, 1vw, 0.6rem) clamp(0.6rem, 2vw, 1rem);
             border-radius: 25px;
-            font-size: 0.9rem;
+            font-size: clamp(0.75rem, 1.5vw, 0.95rem);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .user-avatar {
-            width: 32px;
-            height: 32px;
+            width: clamp(28px, 4vw, 36px);
+            height: clamp(28px, 4vw, 36px);
             background-color: rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
+            font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+            flex-shrink: 0;
         }
 
         .user-role-badge {
-            font-size: 0.75rem;
+            font-size: clamp(0.65rem, 1.2vw, 0.8rem);
             padding: 0.2rem 0.6rem;
             border-radius: 10px;
             background-color: rgba(255, 255, 255, 0.25);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            white-space: nowrap;
         }
 
         .logout-btn, .admin-panel-btn {
-            background-color: rgba(230, 57, 70, 0.8);
+            background-color: rgba(230, 57, 70, 0.85);
             border: none;
             color: white;
-            padding: 0.5rem 1rem;
+            padding: clamp(0.45rem, 1.2vw, 0.6rem) clamp(0.7rem, 2vw, 1.1rem);
             border-radius: 20px;
             cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
+            font-size: clamp(0.75rem, 1.5vw, 0.9rem);
+            transition: all var(--transition-normal);
+            min-height: var(--touch-target-min);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .logout-btn:hover, .admin-panel-btn:hover {
             background-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .logout-btn:active, .admin-panel-btn:active {
+            transform: translateY(0);
         }
 
         .admin-panel-btn {
-            background-color: rgba(40, 167, 69, 0.8);
+            background-color: rgba(40, 167, 69, 0.85);
         }
 
         .admin-panel-btn:hover {
@@ -188,39 +297,78 @@
         }
         
         .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
+            max-width: var(--container-max-width);
+            margin: clamp(1rem, 3vw, 2rem) auto;
+            padding: 0 clamp(0.5rem, 2vw, 1.5rem);
+            flex: 1;
+            width: 100%;
         }
         
         .nav-tabs {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
+            gap: clamp(0.4rem, 1.2vw, 0.8rem);
+            margin-bottom: clamp(1.2rem, 3vw, 2rem);
+            padding: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: var(--border-radius-lg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
         
         .tab-btn {
-            padding: 0.8rem 1.5rem;
+            padding: clamp(0.65rem, 1.5vw, 0.9rem) clamp(1rem, 2.5vw, 1.6rem);
             background-color: white;
-            border: none;
+            border: 2px solid transparent;
             border-radius: 30px;
             cursor: pointer;
             font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all var(--transition-normal);
+            box-shadow: var(--shadow-sm);
             color: var(--dark-color);
+            font-size: clamp(0.8rem, 1.8vw, 1rem);
+            min-height: var(--touch-target-min);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tab-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            opacity: 0;
+            transition: opacity var(--transition-normal);
+            z-index: -1;
         }
         
         .tab-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-color);
+        }
+        
+        .tab-btn:hover::before {
+            opacity: 0.05;
+        }
+        
+        .tab-btn:active {
+            transform: translateY(-1px);
         }
         
         .tab-btn.active {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
+            box-shadow: var(--shadow-md);
+            border-color: transparent;
+        }
+        
+        .tab-btn:focus-visible {
+            outline-offset: 3px;
         }
         
         .section {
@@ -234,15 +382,17 @@
         
         .section-title {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: clamp(1.2rem, 3vw, 2rem);
             color: var(--primary-color);
-            font-size: 1.8rem;
+            font-size: var(--section-title-size);
             border-bottom: 2px solid var(--secondary-color);
             padding-bottom: 0.5rem;
             display: inline-block;
             width: 100%;
             cursor: default;
-            transition: all 0.3s ease;
+            transition: all var(--transition-normal);
+            word-wrap: break-word;
+            hyphens: auto;
         }
 
         .section-title.editable {
@@ -273,57 +423,93 @@
         }
         
         .buttons-grid {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr));
             justify-content: center;
-            gap: 1.5rem;
-            margin-top: 1.5rem;
+            gap: clamp(1rem, 2.5vw, 1.5rem);
+            margin-top: clamp(1rem, 2.5vw, 1.5rem);
+            padding: 0.5rem;
+        }
+        
+        @media (min-width: 1200px) {
+            .buttons-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .buttons-grid {
+                grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr));
+                gap: 0.8rem;
+            }
         }
         
         .apartado-btn {
             position: relative;
-            padding: 1.2rem 0.8rem;
+            padding: clamp(0.9rem, 2vw, 1.3rem) clamp(0.6rem, 1.5vw, 1rem);
             background-color: white;
             border: 2px solid var(--secondary-color);
-            border-radius: 8px;
+            border-radius: var(--border-radius-sm);
             cursor: pointer;
             font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            transition: all var(--transition-normal);
+            box-shadow: var(--shadow-sm);
             color: var(--primary-color);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100px;
-            width: 200px;
+            min-height: clamp(90px, 15vw, 110px);
+            width: 100%;
+            max-width: 220px;
             text-decoration: none;
+            aspect-ratio: auto;
+            -webkit-tap-highlight-color: transparent;
+            justify-self: center;
         }
         
-        .apartado-btn:hover {
+        .apartado-btn:hover,
+        .apartado-btn:focus-visible {
             background-color: var(--secondary-color);
             color: white;
             transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--secondary-color);
+        }
+        
+        .apartado-btn:active {
+            transform: translateY(-2px);
         }
         
         .apartado-btn .apartado-code {
-            font-size: 1.2rem;
+            font-size: clamp(1rem, 2.2vw, 1.25rem);
             margin-bottom: 0.5rem;
             text-align: center;
+            line-height: 1.2;
+            word-break: break-word;
         }
         
         .apartado-btn .apartado-name {
-            font-size: 0.9rem;
+            font-size: clamp(0.75rem, 1.6vw, 0.95rem);
             text-align: center;
             opacity: 0;
             max-height: 0;
-            transition: all 0.3s ease;
+            transition: all var(--transition-normal);
+            overflow: hidden;
         }
         
-        .apartado-btn:hover .apartado-name {
+        .apartado-btn:hover .apartado-name,
+        .apartado-btn:focus .apartado-name {
             opacity: 1;
-            max-height: 100px;
+            max-height: 80px;
+        }
+        
+        /* Mostrar nombre siempre en dispositivos táctiles o pantallas grandes */
+        @media (hover: none) and (pointer: coarse), (min-width: 1400px) {
+            .apartado-btn .apartado-name {
+                opacity: 1;
+                max-height: 80px;
+            }
         }
 
         /* Indicador de edición en botón de etiqueta (admin) */
@@ -395,6 +581,8 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             max-width: 500px;
             width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
         }
 
         .section-title-edit-modal h3 {
@@ -483,16 +671,27 @@
             background-color: var(--dark-color);
             color: white;
             text-align: center;
-            padding: 1.5rem;
-            margin-top: 3rem;
+            padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 5vw, 2rem);
+            margin-top: auto;
+            flex-shrink: 0;
+            width: 100%;
         }
 
         footer p {
             cursor: pointer;
+            font-size: clamp(0.85rem, 1.8vw, 1rem);
+            transition: opacity var(--transition-fast);
+            padding: 0.5rem;
         }
 
         footer p:hover {
             opacity: 0.9;
+        }
+        
+        footer p:focus-visible {
+            outline: 2px solid white;
+            outline-offset: 4px;
+            border-radius: 4px;
         }
 
         /* ===== MODAL DE SELECCIÓN DE MODO ===== */
@@ -774,6 +973,8 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             max-width: 450px;
             width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
         }
 
         .year-modal-header {
@@ -1197,6 +1398,10 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             max-width: 550px;
             width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
 
         .etiqueta-edit-modal h3 {
@@ -1239,6 +1444,8 @@
             box-shadow: 0 25px 70px rgba(220, 53, 69, 0.4);
             max-width: 420px;
             width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
             text-align: center;
             animation: confirmSlideIn 0.3s ease;
         }
@@ -1371,27 +1578,81 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        
+
+        /* ============================================
+           MEDIA QUERIES - RESPONSIVIDAD MULTIPLATAFORMA
+           ============================================ */
+
+        /* Large Desktop (1400px+) */
+        @media (min-width: 1400px) {
+            .container {
+                max-width: 1320px;
+            }
+            
+            .buttons-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 2rem;
+            }
+            
+            .apartado-btn {
+                min-height: 120px;
+                width: 100%;
+                max-width: 220px;
+            }
+        }
+
+        /* Desktop (1024px - 1399px) */
+        @media (min-width: 1024px) and (max-width: 1399px) {
+            .buttons-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+        }
+
+        /* Tablet Landscape / Small Laptop (768px - 1023px) */
+        @media (min-width: 769px) and (max-width: 1023px) {
+            :root {
+                --header-font-size: clamp(1.4rem, 5vw, 1.8rem);
+                --section-title-size: clamp(1.2rem, 3.5vw, 1.6rem);
+            }
+            
+            .nav-tabs {
+                gap: 0.6rem;
+            }
+            
+            .tab-btn {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.9rem;
+            }
+            
+            .buttons-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 1.2rem;
+            }
+            
+            .apartado-btn {
+                min-height: 95px;
+                padding: 1rem;
+            }
+        }
+
+        /* Tablet Portrait / Large Phone (481px - 768px) */
         @media (max-width: 768px) {
             .nav-tabs {
                 flex-direction: column;
                 align-items: center;
+                background-color: transparent;
+                backdrop-filter: none;
+                padding: 0;
             }
             
             .tab-btn {
                 width: 100%;
-                max-width: 300px;
-            }
-
-            .user-panel {
-                position: static;
-                justify-content: center;
-                margin-top: 1rem;
-                flex-wrap: wrap;
+                max-width: 320px;
+                border-radius: var(--border-radius-md);
             }
 
             header {
-                padding: 1rem;
+                padding: clamp(0.8rem, 2.5vw, 1.2rem);
             }
 
             .mode-options {
@@ -1408,34 +1669,134 @@
 
             .admin-panel {
                 width: 98%;
-                padding: 1.5rem;
+                padding: var(--modal-padding);
+            }
+
+            /* Mejoras para modales en tablets */
+            .etiqueta-edit-modal,
+            .section-title-edit-modal,
+            .year-modal,
+            .confirm-dialog,
+            .mode-modal,
+            .login-modal {
+                max-height: 90vh;
+                width: 95%;
+                margin: 1rem auto;
+                border-radius: var(--border-radius-lg);
+            }
+
+            .etiqueta-edit-modal {
+                max-width: 500px;
+            }
+            
+            /* Ajustes específicos para modales con degradado */
+            .mode-modal,
+            .login-modal {
+                border-radius: var(--border-radius-xl);
+            }
+            
+            /* Botones en modales más grandes en táctil */
+            .save-year-btn,
+            .cancel-year-btn,
+            .login-btn,
+            .btn-confirm-delete,
+            .btn-cancel-confirm {
+                min-height: var(--touch-target-min);
+                font-size: 1rem;
             }
         }
-        
+
+        /* Estilos específicos para portátiles con altura limitada */
+        @media (min-height: 600px) and (max-height: 800px) {
+            .etiqueta-edit-modal,
+            .section-title-edit-modal,
+            .year-modal,
+            .confirm-dialog {
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+
+            #backupOverlay .etiqueta-edit-modal {
+                max-height: 80vh;
+            }
+
+            #backupsList {
+                max-height: 35vh !important;
+            }
+        }
+
+        /* Small Phone / Compact View (max 480px) */
         @media (max-width: 480px) {
+            :root {
+                --base-font-size: 15px; /* Tamaño base ligeramente mayor en móvil */
+            }
+            
             .buttons-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(auto-fill, minmax(min(140px, 100%), 1fr));
+                gap: 0.7rem;
+                margin-top: 0.8rem;
             }
             
             header h1 {
-                font-size: 1.5rem;
+                font-size: clamp(1.25rem, 6vw, 1.6rem);
             }
 
             .user-panel {
-                flex-direction: column;
-                gap: 0.5rem;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 0.4rem;
+                bottom: 0.3rem;
+            }
+            
+            .user-info {
+                padding: 0.35rem 0.7rem;
+                font-size: 0.75rem;
+            }
+            
+            .logout-btn,
+            .admin-panel-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.72rem;
             }
 
-            .login-modal, .mode-modal {
-                padding: 1.5rem;
+            .mode-modal,
+            .login-modal {
+                padding: 1.2rem;
+                border-radius: var(--border-radius-lg);
+                margin: 0.5rem;
+                width: calc(100% - 1rem);
             }
 
-            .year-modal, .etiqueta-edit-modal {
-                padding: 1.5rem;
+            .mode-header h2,
+            .login-header h2 {
+                font-size: 1.4rem;
+            }
+            
+            .mode-option-icon {
+                font-size: 2rem;
             }
 
             .mode-option-title {
                 font-size: 1.1rem;
+            }
+            
+            .mode-option-desc {
+                font-size: 0.85rem;
+            }
+
+            .year-modal,
+            .etiqueta-edit-modal,
+            .section-title-edit-modal,
+            .confirm-dialog {
+                padding: 1rem;
+                max-height: 92vh;
+                width: 96%;
+                border-radius: var(--border-radius-md);
+            }
+            
+            .section-title {
+                font-size: clamp(1.15rem, 4.5vw, 1.5rem);
+                margin-bottom: 1rem;
             }
 
             .user-item {
@@ -1447,6 +1808,201 @@
             .user-actions {
                 justify-content: flex-end;
             }
+            
+            /* Formularios en móviles */
+            .form-group input,
+            .form-row input {
+                padding: 0.75rem;
+                font-size: 16px; /* Prevenir zoom en iOS */
+            }
+            
+            /* Botones de acción más grandes para táctil */
+            button[type="submit"],
+            .btn-add-user,
+            .btn-change-password {
+                min-height: 48px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Extra small devices (320px - 374px) */
+        @media (max-width: 374px) {
+            .buttons-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.6rem;
+            }
+            
+            .apartado-btn {
+                min-height: 85px;
+                padding: 0.7rem 0.4rem;
+                font-size: 0.85rem;
+            }
+            
+            .apartado-btn .apartado-code {
+                font-size: 0.9rem;
+            }
+            
+            .apartado-btn .apartado-name {
+                font-size: 0.7rem;
+            }
+            
+            .tab-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+            }
+            
+            .user-panel {
+                max-width: 280px;
+            }
+            
+            .user-info {
+                display: none; /* Ocultar info completa en pantallas muy pequeñas */
+            }
+            
+            .user-avatar {
+                width: 30px;
+                height: 30px;
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Pantallas muy anchas (orientación landscape en móvil/tablet) */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .mode-overlay,
+            .login-overlay,
+            .year-modal-overlay,
+            .etiqueta-edit-overlay,
+            .section-title-edit-overlay,
+            .confirm-overlay {
+                padding: 0.5rem;
+            }
+            
+            .mode-modal,
+            .login-modal,
+            .year-modal,
+            .etiqueta-edit-modal,
+            .section-title-edit-modal,
+            .confirm-dialog {
+                max-height: 95vh;
+                max-width: 90vw;
+                overflow-y: auto;
+            }
+            
+            header {
+                padding: 0.5rem 1rem;
+            }
+            
+            .container {
+                margin: 0.5rem auto;
+            }
+        }
+
+        /* Preferencias del usuario: reducir animaciones */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Impresión */
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+            
+            header,
+            .user-panel,
+            .nav-tabs,
+            footer,
+            .add-etiqueta-btn,
+            .delete-etiqueta-btn,
+            .edit-badge,
+            .admin-panel-btn,
+            .mode-overlay,
+            .login-overlay,
+            .year-modal-overlay,
+            .etiqueta-edit-overlay,
+            .section-title-edit-overlay,
+            .confirm-overlay,
+            .backupOverlay {
+                display: none !important;
+            }
+            
+            .section {
+                display: block !important;
+                page-break-inside: avoid;
+            }
+            
+            .apartado-btn {
+                border: 1px solid #ccc;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Estilo del scrollbar - Cross Browser */
+        
+        /* WebKit (Chrome, Safari, Edge) */
+        .etiqueta-edit-modal::-webkit-scrollbar,
+        .section-title-edit-modal::-webkit-scrollbar,
+        .year-modal::-webkit-scrollbar,
+        .confirm-dialog::-webkit-scrollbar,
+        #backupsList::-webkit-scrollbar,
+        .admin-panel::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .etiqueta-edit-modal::-webkit-scrollbar-track,
+        .section-title-edit-modal::-webkit-scrollbar-track,
+        .year-modal::-webkit-scrollbar-track,
+        .confirm-dialog::-webkit-scrollbar-track,
+        #backupsList::-webkit-scrollbar-track,
+        .admin-panel::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .etiqueta-edit-modal::-webkit-scrollbar-thumb,
+        .section-title-edit-modal::-webkit-scrollbar-thumb,
+        .year-modal::-webkit-scrollbar-thumb,
+        .confirm-dialog::-webkit-scrollbar-thumb,
+        #backupsList::-webkit-scrollbar-thumb,
+        .admin-panel::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--secondary-color), var(--primary-color));
+            border-radius: 4px;
+            border: 2px solid #f1f1f1;
+        }
+
+        .etiqueta-edit-modal::-webkit-scrollbar-thumb:hover,
+        .section-title-edit-modal::-webkit-scrollbar-thumb:hover,
+        .year-modal::-webkit-scrollbar-thumb:hover,
+        .confirm-dialog::-webkit-scrollbar-thumb:hover,
+        #backupsList::-webkit-scrollbar-thumb:hover,
+        .admin-panel::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--primary-color), var(--dark-color));
+        }
+        
+        /* Firefox */
+        .etiqueta-edit-modal,
+        .section-title-edit-modal,
+        .year-modal,
+        .confirm-dialog,
+        #backupsList,
+        .admin-panel {
+            scrollbar-width: thin;
+            scrollbar-color: var(--secondary-color) #f1f1f1;
+        }
+        
+        /* Scrollbar global para body/html */
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) transparent;
         }
     </style>
 </head>
